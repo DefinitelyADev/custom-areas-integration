@@ -180,8 +180,11 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     attrs = sensor.extra_state_attributes
 
     assert attrs["power_w"] == 25.5
+    assert attrs["power_w_unit"] == "W"
     assert attrs["energy_wh"] == 150.0
+    assert attrs["energy_wh_unit"] == "Wh"
     assert attrs["temperature_c"] == 22.3
+    assert attrs["temperature_c_unit"] == "°C"
     assert attrs["occupied"] is True
 
 

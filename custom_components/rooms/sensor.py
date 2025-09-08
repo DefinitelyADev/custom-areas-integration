@@ -13,6 +13,9 @@ from homeassistant.const import (
     PERCENTAGE,
     STATE_ON,
     STATE_OFF,
+    TEMP_CELSIUS,
+    POWER_WATT,
+    ENERGY_WATT_HOUR,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
@@ -208,10 +211,13 @@ class RoomSummarySensor(SensorEntity):
             if power_state:
                 try:
                     attrs["power_w"] = float(power_state.state)
+                    attrs["power_w_unit"] = POWER_WATT
                 except (ValueError, TypeError):
                     attrs["power_w"] = 0.0
+                    attrs["power_w_unit"] = POWER_WATT
             else:
                 attrs["power_w"] = 0.0
+                attrs["power_w_unit"] = POWER_WATT
 
         energy_entity = data.get(CONF_ENERGY_ENTITY)
         if energy_entity:
@@ -219,10 +225,13 @@ class RoomSummarySensor(SensorEntity):
             if energy_state:
                 try:
                     attrs["energy_wh"] = float(energy_state.state)
+                    attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
                 except (ValueError, TypeError):
                     attrs["energy_wh"] = 0.0
+                    attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
             else:
                 attrs["energy_wh"] = 0.0
+                attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
 
         temp_entity = data.get(CONF_TEMP_ENTITY)
         if temp_entity:
@@ -230,6 +239,7 @@ class RoomSummarySensor(SensorEntity):
             if temp_state:
                 try:
                     attrs["temperature_c"] = float(temp_state.state)
+                    attrs["temperature_c_unit"] = TEMP_CELSIUS
                 except (ValueError, TypeError):
                     pass
 
@@ -239,6 +249,7 @@ class RoomSummarySensor(SensorEntity):
             if humidity_state:
                 try:
                     attrs["humidity_pct"] = float(humidity_state.state)
+                    attrs["humidity_pct_unit"] = PERCENTAGE
                 except (ValueError, TypeError):
                     pass
 
@@ -259,6 +270,7 @@ class RoomSummarySensor(SensorEntity):
                 attrs["climate_mode"] = climate_state.state
                 if climate_state.attributes.get("temperature"):
                     attrs["climate_target_c"] = climate_state.attributes["temperature"]
+                    attrs["climate_target_c_unit"] = TEMP_CELSIUS
 
         return attrs
 
