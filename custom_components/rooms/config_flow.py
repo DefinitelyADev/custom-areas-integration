@@ -24,7 +24,9 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class RoomsConfigFlow(
+    config_entries.ConfigFlow, domain=DOMAIN
+):  # type: ignore[call-arg]  # HA's __init_subclass__ accepts domain parameter
     """Handle a config flow for Rooms."""
 
     VERSION = 1
@@ -38,7 +40,7 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: Optional[Dict[str, Any]] = None
     ) -> FlowResult:
         """Handle the initial step."""
-        errors = {}
+        errors: Dict[str, str] = {}
 
         if user_input is not None:
             # Validate room name is unique

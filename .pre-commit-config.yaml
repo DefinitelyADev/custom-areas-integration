@@ -31,6 +31,15 @@ repos:
         args: ["--max-line-length=88", "--extend-ignore=E203,W503"]
         exclude: ^stubs/
 
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: ./run_mypy.sh
+        language: system
+        files: ^custom_components/
+        pass_filenames: false
+
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks

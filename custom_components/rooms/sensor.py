@@ -1,7 +1,7 @@
 """Sensor platform for Rooms integration."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -76,10 +76,10 @@ class RoomSensorCoordinator:
         """Initialize the coordinator."""
         self.hass = hass
         self.config_entry = config_entry
-        self._listeners = []
-        self._summary_sensor = None
+        self._listeners: list[Callable[..., Any]] = []
+        self._summary_sensor: Optional["RoomSummarySensor"] = None
 
-    def async_config_entry_first_refresh(self) -> None:
+    async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
         entities_to_track = []
 
@@ -98,11 +98,10 @@ class RoomSensorCoordinator:
                 entities_to_track.append(entity_id)
 
         if entities_to_track:
-            self._listeners.append(
-                async_track_state_change_event(
-                    self.hass, entities_to_track, self._handle_state_change
-                )
+            listener = await async_track_state_change_event(
+                self.hass, entities_to_track, self._handle_state_change
             )
+            self._listeners.append(listener)
 
     @callback
     def _handle_state_change(self, event: Event) -> None:
@@ -111,6 +110,7 @@ class RoomSensorCoordinator:
             self.hass.async_create_task(
                 self._summary_sensor.async_schedule_update_ha_state()
             )
+        return
 
     def register_summary_sensor(self, sensor: "RoomSummarySensor") -> None:
         """Register the summary sensor."""

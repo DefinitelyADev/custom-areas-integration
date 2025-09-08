@@ -127,3 +127,5 @@ jobs:
         black --check --diff custom_components/rooms/
         isort --check-only --diff custom_components/rooms/
         flake8 custom_components/rooms/
+        ruff check custom_components/rooms/
+        cd custom_components && python -m mypy rooms/
