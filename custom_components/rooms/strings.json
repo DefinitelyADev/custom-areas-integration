@@ -1,0 +1,57 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Room",
+        "description": "Configure a new room sensor",
+        "data": {
+          "room_name": "Room Name",
+          "power_entity": "Power Sensor (optional)",
+          "temp_entity": "Temperature Sensor (optional)",
+          "humidity_entity": "Humidity Sensor (optional)",
+          "motion_entity": "Motion Sensor (optional)",
+          "window_entity": "Window Sensor (optional)",
+          "climate_entity": "Climate Entity (optional)",
+          "active_threshold": "Active Power Threshold (W)"
+        }
+      }
+    },
+    "error": {
+      "entity_not_found": "Entity not found",
+      "invalid_entity": "Invalid entity ID"
+    },
+    "abort": {
+      "already_configured": "Room already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Room Options",
+        "description": "Configure room settings",
+        "data": {
+          "room_name": "Room Name",
+          "power_entity": "Power Sensor (optional)",
+          "temp_entity": "Temperature Sensor (optional)",
+          "humidity_entity": "Humidity Sensor (optional)",
+          "motion_entity": "Motion Sensor (optional)",
+          "window_entity": "Window Sensor (optional)",
+          "climate_entity": "Climate Entity (optional)",
+          "active_threshold": "Active Power Threshold (W)"
+        }
+      },
+      "metrics": {
+        "title": "Custom Metrics",
+        "description": "Add custom metrics for this room",
+        "data": {
+          "label": "Metric Label",
+          "entity_id": "Source Entity",
+          "unit": "Unit of Measurement",
+          "device_class": "Device Class",
+          "state_class": "State Class",
+          "create_child_sensor": "Create Child Sensor"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "domain": "rooms",
+  "name": "Rooms",
+  "codeowners": ["@DefinitelyADev"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/DefinitelyADev/room-entity",
+  "homeassistant": "2024.1.0",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/DefinitelyADev/room-entity/issues",
+  "requirements": [],
+  "version": "0.0.1"
+}
