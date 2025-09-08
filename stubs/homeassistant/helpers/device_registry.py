@@ -1,11 +1,14 @@
 """Home Assistant device registry helpers stubs."""
 
 from typing import Any, Optional
+
 from ..core import HomeAssistant
+
 
 def async_get(hass: HomeAssistant) -> "DeviceRegistry":
     """Get the device registry."""
     ...
+
 
 class DeviceRegistry:
     """Device registry for managing devices."""

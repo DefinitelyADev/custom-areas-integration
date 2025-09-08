@@ -2,11 +2,13 @@
 
 from typing import Any
 
+
 class UnitOfPower:
     """Power unit constants."""
 
     WATT: str = "W"
     KILO_WATT: str = "kW"
+
 
 class UnitOfEnergy:
     """Energy unit constants."""

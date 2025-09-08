@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, Optional, Union
 
+
 class DeviceInfo:
     """Device information for entities."""
 
@@ -22,6 +23,7 @@ class DeviceInfo:
     ) -> None:
         """Initialize device info."""
         ...
+
 
 class Entity:
     """Base entity class."""

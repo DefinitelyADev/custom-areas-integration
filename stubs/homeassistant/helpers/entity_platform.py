@@ -1,10 +1,12 @@
 """Home Assistant entity platform helpers stubs."""
 
 from typing import Any, Awaitable, Callable, List, Optional
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 AddEntitiesCallback = Callable[[List[Any]], Awaitable[None]]
+
 
 class EntityPlatform:
     """Entity platform for managing entities."""

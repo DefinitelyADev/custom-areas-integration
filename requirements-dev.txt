@@ -6,3 +6,12 @@ pytest-homeassistant-custom-component>=0.13.0
 # Home Assistant testing
 homeassistant>=2023.6.0
 voluptuous>=0.13.0
+
+# Code quality
+black>=23.0.0
+isort>=5.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Pre-commit
+pre-commit>=3.0.0

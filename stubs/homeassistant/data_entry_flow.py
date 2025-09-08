@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, Optional
 
+
 class FlowResult:
     """Result of a data entry flow step."""
 

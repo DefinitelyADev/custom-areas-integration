@@ -2,12 +2,17 @@
 
 from typing import Any, Dict, List, Optional, Union
 
+
 class Selector:
     """Base selector class."""
 
-    def __init__(self, config: Union[Dict[str, Any], "EntitySelectorConfig", "TextSelectorConfig"]) -> None:
+    def __init__(
+        self,
+        config: Union[Dict[str, Any], "EntitySelectorConfig", "TextSelectorConfig"],
+    ) -> None:
         """Initialize selector."""
         ...
+
 
 class EntitySelectorConfig:
     """Configuration for entity selector."""
@@ -22,6 +27,7 @@ class EntitySelectorConfig:
         """Initialize entity selector config."""
         ...
 
+
 class TextSelectorConfig:
     """Configuration for text selector."""
 
@@ -33,6 +39,7 @@ class TextSelectorConfig:
     ) -> None:
         """Initialize text selector config."""
         ...
+
 
 class EntitySelector(Selector):
     """Entity selector."""
@@ -47,6 +54,7 @@ class EntitySelector(Selector):
     ) -> None:
         """Initialize entity selector."""
         ...
+
 
 class TextSelector(Selector):
     """Text selector."""

@@ -1,7 +1,9 @@
 # Type stubs for homeassistant.config_entries
-from typing import Any, Dict, Optional, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict, Optional
+
 from ..core import HomeAssistant
 from ..data_entry_flow import FlowResult
+
 
 class ConfigEntry:
     """Configuration entry for Home Assistant integrations."""
@@ -28,13 +30,16 @@ class ConfigEntry:
         """Initialize config entry."""
         ...
 
-    async def async_on_unload(self, func: Optional[Callable[[], Awaitable[None]]]) -> None:
+    async def async_on_unload(
+        self, func: Optional[Callable[[], Awaitable[None]]]
+    ) -> None:
         """Register a callback to be called when the entry is unloaded."""
         ...
 
     def add_update_listener(self, listener: Callable[..., Awaitable[None]]) -> None:
         """Add an update listener."""
         ...
+
 
 class ConfigFlow:
     """Base class for config flows."""
@@ -54,7 +59,9 @@ class ConfigFlow:
         """Set unique ID for the config flow."""
         ...
 
-    def _abort_if_unique_id_configured(self, updates: Optional[Dict[str, Any]] = None) -> Optional[FlowResult]:
+    def _abort_if_unique_id_configured(
+        self, updates: Optional[Dict[str, Any]] = None
+    ) -> Optional[FlowResult]:
         """Abort if unique ID is already configured."""
         ...
 
@@ -78,10 +85,18 @@ class ConfigFlow:
         """Show form for the current step."""
         ...
 
+
 class ConfigEntriesFlowManager:
     """Manager for config entries flow."""
-    async def async_forward_entry_setups(self, entry: ConfigEntry, platforms: Any) -> None: ...
-    async def async_unload_platforms(self, entry: ConfigEntry, platforms: Any) -> bool: ...
+
+    async def async_forward_entry_setups(
+        self, entry: ConfigEntry, platforms: Any
+    ) -> None:
+        ...
+
+    async def async_unload_platforms(self, entry: ConfigEntry, platforms: Any) -> bool:
+        ...
+
 
 # Re-export for convenience
 __all__ = ["ConfigEntry", "ConfigFlow", "ConfigEntriesFlowManager"]

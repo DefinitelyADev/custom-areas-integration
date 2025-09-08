@@ -2,6 +2,7 @@
 # This provides basic type information for Pylance/Pyright
 
 from typing import Any
+
 from . import config_entries
 
 __all__ = ["config_entries"]

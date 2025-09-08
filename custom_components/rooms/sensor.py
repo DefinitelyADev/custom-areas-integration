@@ -1,26 +1,29 @@
 """Sensor platform for Rooms integration."""
+
 import logging
 from typing import Any, Dict, Optional
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, STATE_ON
-from homeassistant.core import HomeAssistant, callback, Event
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
 
 # Try to import unit constants, fall back to local definitions if not available
 try:
+    from homeassistant.util.unit_conversion import UnitOfEnergy, UnitOfPower
     from homeassistant.util.unit_system import UnitOfTemperature
-    from homeassistant.util.unit_conversion import UnitOfPower, UnitOfEnergy
+
     UNIT_CELSIUS = UnitOfTemperature.CELSIUS
     UNIT_WATT = UnitOfPower.WATT
     UNIT_WATT_HOUR = UnitOfEnergy.WATT_HOUR
 except ImportError:
     # Fallback for older versions or if unit system constants don't exist
     try:
-        from homeassistant.const import TEMP_CELSIUS, POWER_WATT, ENERGY_WATT_HOUR
+        from homeassistant.const import ENERGY_WATT_HOUR, POWER_WATT, TEMP_CELSIUS
+
         UNIT_CELSIUS = TEMP_CELSIUS
         UNIT_WATT = POWER_WATT
         UNIT_WATT_HOUR = ENERGY_WATT_HOUR
@@ -122,7 +125,9 @@ class RoomSensorCoordinator:
 class RoomSummarySensor(SensorEntity):
     """Room summary sensor."""
 
-    def __init__(self, coordinator: RoomSensorCoordinator, config_entry: ConfigEntry) -> None:
+    def __init__(
+        self, coordinator: RoomSensorCoordinator, config_entry: ConfigEntry
+    ) -> None:
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
@@ -141,18 +146,25 @@ class RoomSummarySensor(SensorEntity):
             model="Room Sensor",
         )
 
-    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
+    def _get_numeric_state(
+        self, entity_id: str, default_value: float = 0.0
+    ) -> Optional[float]:
         """Get numeric state from entity, with fallback to default."""
         if not entity_id:
             return None
-        
+
         state = self.hass.states.get(entity_id)
         if state:
             try:
                 value = float(state.state)
                 return value if value != 0.0 else default_value
             except (ValueError, TypeError) as err:
-                _LOGGER.debug("Failed to convert state %s for entity %s: %s", state.state, entity_id, err)
+                _LOGGER.debug(
+                    "Failed to convert state %s for entity %s: %s",
+                    state.state,
+                    entity_id,
+                    err,
+                )
                 pass
         return None
 
@@ -226,7 +238,7 @@ class RoomSummarySensor(SensorEntity):
 
         # Cache state lookups for performance
         cached_states = {}
-        
+
         def get_cached_state(entity_id: str):
             """Get state with caching to avoid multiple lookups."""
             if entity_id not in cached_states:
@@ -261,12 +273,16 @@ class RoomSummarySensor(SensorEntity):
         motion_entity = data.get(CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = get_cached_state(motion_entity)
-            attrs["occupied"] = motion_state.state == STATE_ON if motion_state else False
+            attrs["occupied"] = (
+                motion_state.state == STATE_ON if motion_state else False
+            )
 
         window_entity = data.get(CONF_WINDOW_ENTITY)
         if window_entity:
             window_state = get_cached_state(window_entity)
-            attrs["window_open"] = window_state.state == STATE_ON if window_state else False
+            attrs["window_open"] = (
+                window_state.state == STATE_ON if window_state else False
+            )
 
         climate_entity = data.get(CONF_CLIMATE_ENTITY)
         if climate_entity:
@@ -278,5 +294,3 @@ class RoomSummarySensor(SensorEntity):
                     attrs["climate_target_c_unit"] = UNIT_CELSIUS
 
         return attrs
-
-

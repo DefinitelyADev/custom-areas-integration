@@ -1,4 +1,5 @@
 """Rooms integration for Home Assistant."""
+
 import logging
 
 from homeassistant.config_entries import ConfigEntry

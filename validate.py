@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Simple validation script for the Rooms integration."""
 
-import os
 import json
 import sys
 from pathlib import Path
+
 
 def validate_manifest():
     """Validate manifest.json."""
@@ -17,7 +17,13 @@ def validate_manifest():
         with open(manifest_path) as f:
             manifest = json.load(f)
 
-        required_fields = ["domain", "name", "version", "config_flow", "integration_type"]
+        required_fields = [
+            "domain",
+            "name",
+            "version",
+            "config_flow",
+            "integration_type",
+        ]
         for field in required_fields:
             if field not in manifest:
                 print(f"❌ Missing required field in manifest: {field}")
@@ -32,6 +38,7 @@ def validate_manifest():
     except json.JSONDecodeError as e:
         print(f"❌ Invalid JSON in manifest.json: {e}")
         return False
+
 
 def validate_translations():
     """Validate translation files."""
@@ -73,6 +80,7 @@ def validate_translations():
         print(f"❌ Invalid JSON in translation files: {e}")
         return False
 
+
 def validate_structure():
     """Validate basic file structure."""
     required_files = [
@@ -99,6 +107,7 @@ def validate_structure():
     print("✅ All required files present")
     return True
 
+
 def main():
     """Run all validations."""
     print("🔍 Validating Rooms integration...")
@@ -114,6 +123,7 @@ def main():
     else:
         print("\n❌ Validation failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

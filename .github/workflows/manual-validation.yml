@@ -1,0 +1,115 @@
+name: Manual Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      validation_type:
+        description: 'Type of validation to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - tests
+        - validate
+        - lint
+        - type-check
+        - hacs
+
+jobs:
+  manual-test:
+    if: inputs.validation_type == 'all' || inputs.validation_type == 'tests'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Run tests
+      run: |
+        python run_tests.py
+
+  manual-validate:
+    if: inputs.validation_type == 'all' || inputs.validation_type == 'validate'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Run custom validation
+      run: |
+        python validate.py
+
+  manual-lint:
+    if: inputs.validation_type == 'all' || inputs.validation_type == 'lint'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Run linting
+      run: |
+        black --check --diff custom_components/rooms/
+        isort --check-only --diff custom_components/rooms/
+        flake8 custom_components/rooms/
+
+  manual-type-check:
+    if: inputs.validation_type == 'all' || inputs.validation_type == 'type-check'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Install pyright
+      run: |
+        npm install -g pyright
+
+    - name: Run type checking
+      run: |
+        pyright
+
+  manual-hacs:
+    if: inputs.validation_type == 'all' || inputs.validation_type == 'hacs'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: HACS validation
+      uses: hacs/action@main
+      with:
+        category: integration

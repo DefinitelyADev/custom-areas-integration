@@ -131,12 +131,60 @@ logger:
 4. Add tests for new functionality
 5. Submit a pull request
 
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+### Automated Checks
+
+- **Tests**: Run on Python 3.9, 3.10, 3.11, and 3.12
+- **Validation**: Custom validation of manifest, translations, and structure
+- **Type Checking**: Pyright type checking
+- **Linting**: Black formatting, isort import sorting, and flake8 linting
+- **HACS Validation**: Ensures compatibility with HACS
+- **Pre-commit**: Code quality checks on pull requests
+
+### Workflows
+
+- `ci.yml`: Main CI pipeline triggered on push/PR
+- `pre-commit.yml`: Code quality checks
+- `manual-validation.yml`: Manual validation triggers
+
+### Local Development
+
+Run all checks locally:
+
+```bash
+pip install -r requirements-dev.txt
+python check_all.py
+```
+
+Or run individual checks:
+
+```bash
+python validate.py          # Custom validation
+python run_tests.py         # Unit tests
+pyright                    # Type checking
+black --check custom_components/rooms/    # Code formatting
+isort --check-only custom_components/rooms/  # Import sorting
+flake8 custom_components/rooms/           # Linting
+```
+
+### Pre-commit Setup
+
+Install pre-commit hooks for automatic code quality:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
 ## License
 
 This integration is licensed under the Apache License 2.0.
 
 ## Author
 
-**Tsakiridis Ilias**  
-GitHub: [@DefinitelyADev](https://github.com/DefinitelyADev)  
-Location: Greece  
+**Tsakiridis Ilias**
+GitHub: [@DefinitelyADev](https://github.com/DefinitelyADev)
+Location: Greece

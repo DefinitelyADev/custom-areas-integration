@@ -2,6 +2,7 @@
 
 from typing import Any
 
+
 class UnitOfTemperature:
     """Temperature unit constants."""
 

@@ -1,10 +1,11 @@
 """Test the Rooms sensors."""
+
 import sys
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON, STATE_OFF
+from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant
 
 from custom_components.rooms.const import (
@@ -19,7 +20,7 @@ from custom_components.rooms.const import (
     STATE_IDLE,
     STATE_UNKNOWN,
 )
-from custom_components.rooms.sensor import RoomSummarySensor, RoomSensorCoordinator
+from custom_components.rooms.sensor import RoomSensorCoordinator, RoomSummarySensor
 
 
 @pytest.fixture
@@ -54,7 +55,9 @@ def mock_coordinator(mock_hass, mock_config_entry):
     return coordinator
 
 
-def test_room_summary_sensor_initialization(mock_coordinator, mock_config_entry, mock_hass):
+def test_room_summary_sensor_initialization(
+    mock_coordinator, mock_config_entry, mock_hass
+):
     """Test room summary sensor initialization."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -64,7 +67,9 @@ def test_room_summary_sensor_initialization(mock_coordinator, mock_config_entry,
     assert sensor.should_poll is False
 
 
-def test_room_summary_sensor_state_unknown(mock_coordinator, mock_config_entry, mock_hass):
+def test_room_summary_sensor_state_unknown(
+    mock_coordinator, mock_config_entry, mock_hass
+):
     """Test room summary sensor state when no entities configured."""
     # Configure entry with no entities
     mock_config_entry.data = {CONF_ROOM_NAME: "Test Room"}
@@ -102,7 +107,9 @@ def test_room_summary_sensor_state_idle(mock_coordinator, mock_config_entry, moc
     assert sensor.state == STATE_IDLE
 
 
-def test_room_summary_sensor_state_active_motion(mock_coordinator, mock_config_entry, mock_hass):
+def test_room_summary_sensor_state_active_motion(
+    mock_coordinator, mock_config_entry, mock_hass
+):
     """Test room summary sensor state when motion detected."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -121,7 +128,9 @@ def test_room_summary_sensor_state_active_motion(mock_coordinator, mock_config_e
     assert sensor.state == STATE_ACTIVE
 
 
-def test_room_summary_sensor_state_active_power(mock_coordinator, mock_config_entry, mock_hass):
+def test_room_summary_sensor_state_active_power(
+    mock_coordinator, mock_config_entry, mock_hass
+):
     """Test room summary sensor state when power above threshold."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -228,9 +237,9 @@ def test_unit_constant_fallbacks(monkeypatch):
 
     # Remove the modules we want to test as missing
     modules_to_remove = [
-        'homeassistant.util.unit_system',
-        'homeassistant.util.unit_conversion',
-        'homeassistant.const'
+        "homeassistant.util.unit_system",
+        "homeassistant.util.unit_conversion",
+        "homeassistant.const",
     ]
 
     for module in modules_to_remove:
@@ -239,6 +248,7 @@ def test_unit_constant_fallbacks(monkeypatch):
     try:
         # Reload the module to test the import logic
         import importlib
+
         importlib.reload(sensor)
 
         # Verify constants are set to expected fallback values
@@ -259,8 +269,8 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
     original_modules = dict(sys.modules)
 
     modules_to_remove = [
-        'homeassistant.util.unit_system',
-        'homeassistant.util.unit_conversion'
+        "homeassistant.util.unit_system",
+        "homeassistant.util.unit_conversion",
     ]
 
     for module in modules_to_remove:
@@ -269,9 +279,11 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
     try:
         # Reload to test fallback to deprecated constants
         import importlib
+
         importlib.reload(sensor)
 
-        # Should use deprecated constants (which will show deprecation warnings but work)
+        # Should use deprecated constants (which will show deprecation
+        # warnings but work)
         assert sensor.UNIT_CELSIUS is not None
         assert sensor.UNIT_WATT is not None
         assert sensor.UNIT_WATT_HOUR is not None
@@ -287,7 +299,9 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
         sys.modules.update(original_modules)
 
 
-def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
+def test_sensor_functionality_with_fallback_units(
+    mock_coordinator, mock_config_entry, mock_hass
+):
     """Test that sensor works correctly even with fallback unit constants."""
     sensor_instance = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor_instance.hass = mock_hass
@@ -313,7 +327,8 @@ def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_
 
     mock_hass.states.get = mock_get
 
-    # Test that attributes are generated correctly regardless of which unit constants are used
+    # Test that attributes are generated correctly regardless of which
+    # unit constants are used
     attrs = sensor_instance.extra_state_attributes
 
     assert attrs["power_w"] == 100.0
