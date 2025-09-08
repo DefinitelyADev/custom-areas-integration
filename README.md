@@ -9,6 +9,15 @@ A custom integration for Home Assistant that creates composite "Room" sensors wi
 - **Real-time Updates**: Uses event-driven updates instead of polling for instant state changes
 - **Device Registry**: Creates proper devices in Home Assistant's device registry
 
+## Documentation
+
+📖 **Complete Documentation**: [docs/](docs/)
+
+- **[API Reference](docs/api.md)** - Entity states, attributes, and configuration schema
+- **[Configuration Examples](docs/examples.md)** - Real-world setup examples and use cases
+- **[Developer Guide](docs/developer.md)** - Architecture overview and development setup
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
+
 ## Disclaimer (The Vibe Clause)
 
 This project is proudly *vibe coded*. It was started because it felt like a good idea at the time, and it will continue evolving based on equal parts usefulness, curiosity, and whatever soundtrack is playing. That means:

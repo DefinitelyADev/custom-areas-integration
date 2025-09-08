@@ -1,0 +1,62 @@
+site_name: Rooms Integration Documentation
+site_description: Documentation for the Rooms custom integration for Home Assistant
+site_author: Tsakiridis Ilias
+site_url: https://DefinitelyADev.github.io/room-entity
+
+repo_name: DefinitelyADev/room-entity
+repo_url: https://github.com/DefinitelyADev/room-entity
+edit_uri: edit/master/docs/
+
+copyright: Copyright &copy; 2024 Tsakiridis Ilias
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - API Reference: api.md
+  - Configuration Examples: examples.md
+  - Developer Guide: developer.md
+  - Changelog: ../CHANGELOG.md
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.emoji
+  - tables
+  - admonition
+  - def_list
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DefinitelyADev
+    - icon: fontawesome/brands/home-assistant
+      link: https://www.home-assistant.io/
+
+extra_css:
+  - stylesheets/extra.css
