@@ -45,12 +45,12 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(user_input[CONF_ROOM_NAME])
             self._abort_if_unique_id_configured()
 
-            return self.async_create_entry(
+            return await self.async_create_entry(
                 title=user_input[CONF_ROOM_NAME],
                 data=user_input,
             )
 
-        return self.async_show_form(
+        return await self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
