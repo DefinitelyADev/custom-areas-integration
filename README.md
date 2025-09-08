@@ -6,8 +6,6 @@ A custom integration for Home Assistant that creates composite "Room" sensors wi
 
 - **UI Configuration**: Add rooms through Home Assistant's UI with an intuitive config flow
 - **Composite Sensors**: Each room creates a summary sensor that combines multiple entity states
-- **Dynamic Metrics**: Add custom metrics with configurable units, device classes, and state classes
-- **Child Sensors**: Optional individual sensors for each metric for detailed monitoring
 - **Real-time Updates**: Uses event-driven updates instead of polling for instant state changes
 - **Device Registry**: Creates proper devices in Home Assistant's device registry
 
@@ -60,17 +58,6 @@ Not affiliated with Home Assistant — just vibing on top of it.
    - **Climate Entity**: Optional climate control entity
    - **Active Power Threshold**: Power level (in watts) above which the room is considered "active"
 
-### Adding Custom Metrics
-
-After configuring the basic room settings, you can add custom metrics:
-
-- **Metric Label**: Display name for the metric
-- **Source Entity**: The entity to monitor
-- **Unit of Measurement**: Unit to display (e.g., "W", "°C", "%")
-- **Device Class**: Sensor type (power, temperature, humidity, etc.)
-- **State Class**: How the sensor data should be treated (measurement, total, etc.)
-- **Create Child Sensor**: Whether to create a separate sensor entity for this metric
-
 ## Usage
 
 ### Summary Sensor
@@ -88,14 +75,6 @@ The summary sensor includes these attributes:
 - `window_open`: Window/door status
 - `climate_mode`: Current climate mode
 - `climate_target_c`: Target temperature setting
-- `metrics.<metric_name>`: Values from custom metrics
-
-### Child Sensors
-
-If you enable "Create Child Sensor" for any metric, additional sensors will be created with names like "Room Name - Metric Label". These sensors:
-- Display the raw value from the source entity
-- Use the configured unit of measurement, device class, and state class
-- Are only available when the source entity has a valid state
 
 ## State Logic
 
@@ -130,7 +109,6 @@ Each room creates a device in Home Assistant's device registry, allowing you to:
 
 1. **"Entity not found" error**: Ensure all selected entities exist and are available
 2. **Sensor not updating**: Check that source entities are publishing state changes
-3. **Missing child sensors**: Verify "Create Child Sensor" is enabled for the metric
 
 ### Debug Logging
 

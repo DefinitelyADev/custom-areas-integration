@@ -6,9 +6,7 @@ from typing import Any, Dict, List, Optional
 import voluptuous as vol
 
 from homeassistant.components.sensor import (
-    SensorDeviceClass,
     SensorEntity,
-    SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -21,20 +19,11 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
-from homeassistant.helpers.typing import StateType
-from homeassistant.util import slugify
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
     CONF_CLIMATE_ENTITY,
     CONF_HUMIDITY_ENTITY,
-    CONF_METRICS,
-    CONF_METRIC_CREATE_CHILD,
-    CONF_METRIC_DEVICE_CLASS,
-    CONF_METRIC_ENTITY_ID,
-    CONF_METRIC_LABEL,
-    CONF_METRIC_STATE_CLASS,
-    CONF_METRIC_UNIT,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_ROOM_NAME,
@@ -67,12 +56,6 @@ async def async_setup_entry(
 
     entities = [RoomSummarySensor(coordinator, config_entry)]
 
-    # Add child sensors for metrics that have create_child_sensor=True
-    metrics = config_entry.data.get(CONF_METRICS, [])
-    for metric in metrics:
-        if metric.get(CONF_METRIC_CREATE_CHILD, False):
-            entities.append(RoomChildSensor(coordinator, config_entry, metric))
-
     async_add_entities(entities)
 
 
@@ -85,7 +68,6 @@ class RoomSensorCoordinator:
         self.config_entry = config_entry
         self._listeners = []
         self._summary_sensor = None
-        self._child_sensors = []
 
     async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
@@ -104,13 +86,6 @@ class RoomSensorCoordinator:
             if entity_id:
                 entities_to_track.append(entity_id)
 
-        # Add metric entities
-        metrics = self.config_entry.data.get(CONF_METRICS, [])
-        for metric in metrics:
-            entity_id = metric.get(CONF_METRIC_ENTITY_ID)
-            if entity_id:
-                entities_to_track.append(entity_id)
-
         if entities_to_track:
             self._listeners.append(
                 async_track_state_change_event(
@@ -124,16 +99,9 @@ class RoomSensorCoordinator:
         if self._summary_sensor:
             self._summary_sensor.async_schedule_update_ha_state()
 
-        for sensor in self._child_sensors:
-            sensor.async_schedule_update_ha_state()
-
     def register_summary_sensor(self, sensor):
         """Register the summary sensor."""
         self._summary_sensor = sensor
-
-    def register_child_sensor(self, sensor):
-        """Register a child sensor."""
-        self._child_sensors.append(sensor)
 
     async def async_shutdown(self):
         """Clean up listeners."""
@@ -278,76 +246,6 @@ class RoomSummarySensor(SensorEntity):
                 if climate_state.attributes.get("temperature"):
                     attrs["climate_target_c"] = climate_state.attributes["temperature"]
 
-        # Metric attributes
-        metrics = data.get(CONF_METRICS, [])
-        for metric in metrics:
-            entity_id = metric.get(CONF_METRIC_ENTITY_ID)
-            label = metric.get(CONF_METRIC_LABEL)
-            if entity_id and label:
-                metric_state = self.hass.states.get(entity_id)
-                if metric_state:
-                    attrs[f"metrics.{slugify(label)}"] = metric_state.state
-
         return attrs
 
 
-class RoomChildSensor(SensorEntity):
-    """Room child sensor for individual metrics."""
-
-    def __init__(
-        self,
-        coordinator: RoomSensorCoordinator,
-        config_entry: ConfigEntry,
-        metric: Dict[str, Any]
-    ) -> None:
-        """Initialize the sensor."""
-        self.coordinator = coordinator
-        self.config_entry = config_entry
-        self.metric = metric
-
-        room_name = config_entry.data[CONF_ROOM_NAME]
-        label = metric[CONF_METRIC_LABEL]
-        self._attr_name = f"{room_name} - {label}"
-        self._attr_unique_id = f"{config_entry.entry_id}_{slugify(label)}"
-        self._attr_should_poll = False
-
-        # Set unit and classes from metric
-        if metric.get(CONF_METRIC_UNIT):
-            self._attr_unit_of_measurement = metric[CONF_METRIC_UNIT]
-
-        device_class = metric.get(CONF_METRIC_DEVICE_CLASS)
-        if device_class:
-            self._attr_device_class = SensorDeviceClass(device_class)
-
-        state_class = metric.get(CONF_METRIC_STATE_CLASS)
-        if state_class:
-            self._attr_state_class = SensorStateClass(state_class)
-
-        # Register with coordinator
-        coordinator.register_child_sensor(self)
-
-        # Set up device info
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Room: {room_name}",
-            manufacturer="Rooms Integration",
-            model="Room Sensor",
-        )
-
-    @property
-    def state(self) -> StateType:
-        """Return the state of the sensor."""
-        entity_id = self.metric.get(CONF_METRIC_ENTITY_ID)
-        if entity_id:
-            state = self.hass.states.get(entity_id)
-            return state.state if state else None
-        return None
-
-    @property
-    def available(self) -> bool:
-        """Return if the sensor is available."""
-        entity_id = self.metric.get(CONF_METRIC_ENTITY_ID)
-        if entity_id:
-            state = self.hass.states.get(entity_id)
-            return state is not None
-        return False

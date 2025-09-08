@@ -9,13 +9,6 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.rooms.const import (
     CONF_ACTIVE_THRESHOLD,
-    CONF_METRICS,
-    CONF_METRIC_CREATE_CHILD,
-    CONF_METRIC_DEVICE_CLASS,
-    CONF_METRIC_ENTITY_ID,
-    CONF_METRIC_LABEL,
-    CONF_METRIC_STATE_CLASS,
-    CONF_METRIC_UNIT,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_ROOM_NAME,
@@ -41,16 +34,6 @@ def mock_config_entry():
         CONF_MOTION_ENTITY: "binary_sensor.motion",
         CONF_WINDOW_ENTITY: "binary_sensor.window",
         CONF_ACTIVE_THRESHOLD: 50.0,
-        CONF_METRICS: [
-            {
-                CONF_METRIC_LABEL: "Test Metric",
-                CONF_METRIC_ENTITY_ID: "sensor.test_metric",
-                CONF_METRIC_UNIT: "W",
-                CONF_METRIC_DEVICE_CLASS: "power",
-                CONF_METRIC_STATE_CLASS: "measurement",
-                CONF_METRIC_CREATE_CHILD: True,
-            }
-        ],
     }
     return entry
 
@@ -176,9 +159,6 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     motion_state = MagicMock()
     motion_state.state = STATE_ON
 
-    metric_state = MagicMock()
-    metric_state.state = "100.0"
-
     def mock_get(entity_id):
         if entity_id == "sensor.power":
             return power_state
@@ -186,8 +166,6 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
             return temp_state
         elif entity_id == "binary_sensor.motion":
             return motion_state
-        elif entity_id == "sensor.test_metric":
-            return metric_state
         return None
 
     mock_hass.states.get = mock_get
@@ -197,7 +175,6 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     assert attrs["power_w"] == 25.5
     assert attrs["temperature_c"] == 22.3
     assert attrs["occupied"] is True
-    assert attrs["metrics.test_metric"] == "100.0"
 
 
 def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):

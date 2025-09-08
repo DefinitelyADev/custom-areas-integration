@@ -39,18 +39,6 @@
           "climate_entity": "Climate Entity (optional)",
           "active_threshold": "Active Power Threshold (W)"
         }
-      },
-      "metrics": {
-        "title": "Custom Metrics",
-        "description": "Add custom metrics for this room",
-        "data": {
-          "label": "Metric Label",
-          "entity_id": "Source Entity",
-          "unit": "Unit of Measurement",
-          "device_class": "Device Class",
-          "state_class": "State Class",
-          "create_child_sensor": "Create Child Sensor"
-        }
       }
     }
   }

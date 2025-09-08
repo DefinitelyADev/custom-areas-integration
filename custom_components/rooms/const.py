@@ -9,15 +9,6 @@ CONF_MOTION_ENTITY = "motion_entity"
 CONF_WINDOW_ENTITY = "window_entity"
 CONF_CLIMATE_ENTITY = "climate_entity"
 CONF_ACTIVE_THRESHOLD = "active_threshold"
-CONF_METRICS = "metrics"
-
-# Metric configuration keys
-CONF_METRIC_LABEL = "label"
-CONF_METRIC_ENTITY_ID = "entity_id"
-CONF_METRIC_UNIT = "unit"
-CONF_METRIC_DEVICE_CLASS = "device_class"
-CONF_METRIC_STATE_CLASS = "state_class"
-CONF_METRIC_CREATE_CHILD = "create_child_sensor"
 
 # Default values
 DEFAULT_ACTIVE_THRESHOLD = 50.0
