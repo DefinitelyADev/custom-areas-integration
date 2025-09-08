@@ -102,7 +102,8 @@ Each room creates a device in Home Assistant's device registry, allowing you to:
 
 ## Requirements
 
-- Home Assistant 2023.6.0 or later
+- Home Assistant 2024.1.0 or later
+- Python 3.10 or later
 - Entities must exist before configuring the room
 
 ## Troubleshooting
@@ -137,7 +138,7 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ### Automated Checks
 
-- **Tests**: Run on Python 3.9, 3.10, 3.11, and 3.12
+- **Tests**: Run on Python 3.10, 3.11, and 3.12
 - **Validation**: Custom validation of manifest, translations, and structure
 - **Type Checking**: Pyright type checking
 - **Linting**: Black formatting, isort import sorting, and flake8 linting
