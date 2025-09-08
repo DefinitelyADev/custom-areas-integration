@@ -24,10 +24,11 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class RoomsConfigFlow(config_entries.ConfigFlow):
     """Handle a config flow for Rooms."""
 
     VERSION = 1
+    DOMAIN = DOMAIN
 
     def __init__(self):
         """Initialize the config flow."""
@@ -44,12 +45,12 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(user_input[CONF_ROOM_NAME])
             self._abort_if_unique_id_configured()
 
-            return await self.async_create_entry(
+            return self.async_create_entry(
                 title=user_input[CONF_ROOM_NAME],
                 data=user_input,
             )
 
-        return await self.async_show_form(
+        return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
