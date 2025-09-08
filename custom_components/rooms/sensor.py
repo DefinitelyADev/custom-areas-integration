@@ -79,7 +79,7 @@ class RoomSensorCoordinator:
         self._listeners = []
         self._summary_sensor = None
 
-    async def async_config_entry_first_refresh(self) -> None:
+    def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
         entities_to_track = []
 
@@ -116,7 +116,7 @@ class RoomSensorCoordinator:
         """Register the summary sensor."""
         self._summary_sensor = sensor
 
-    async def async_shutdown(self):
+    def async_shutdown(self):
         """Clean up listeners."""
         for listener in self._listeners:
             listener()
