@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.1] - 2025-09-09
-
 ### Added
 - Initial public release
 - UI configuration flow for easy setup
@@ -31,3 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python 3.10+ support
 - Memory-efficient implementation
 - Clean separation of concerns with coordinator pattern
+
+### Fixed
+- Dependency conflict in requirements-dev.txt between pytest-asyncio and pytest-homeassistant-custom-component
