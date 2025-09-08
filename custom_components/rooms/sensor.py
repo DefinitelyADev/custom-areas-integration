@@ -161,6 +161,7 @@ class RoomSummarySensor(SensorEntity):
         # Check if any core entities exist
         core_entities = [
             data.get(CONF_POWER_ENTITY),
+            data.get(CONF_ENERGY_ENTITY),
             data.get(CONF_TEMP_ENTITY),
             data.get(CONF_HUMIDITY_ENTITY),
             data.get(CONF_MOTION_ENTITY),
