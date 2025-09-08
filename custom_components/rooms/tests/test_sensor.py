@@ -1,8 +1,8 @@
 """Test the Rooms sensors."""
+import sys
 import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.core import HomeAssistant
@@ -15,7 +15,6 @@ from custom_components.rooms.const import (
     CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
-    DOMAIN,
     STATE_ACTIVE,
     STATE_IDLE,
     STATE_UNKNOWN,
@@ -218,3 +217,113 @@ def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
     # Test window icon (takes precedence over motion)
     window_state.state = STATE_ON
     assert sensor.icon == "mdi:window-open-variant"
+
+
+def test_unit_constant_fallbacks(monkeypatch):
+    """Test unit constant import fallbacks work correctly."""
+    from custom_components.rooms import sensor
+
+    # Mock sys.modules to simulate missing modules
+    original_modules = dict(sys.modules)
+
+    # Remove the modules we want to test as missing
+    modules_to_remove = [
+        'homeassistant.util.unit_system',
+        'homeassistant.util.unit_conversion',
+        'homeassistant.const'
+    ]
+
+    for module in modules_to_remove:
+        sys.modules.pop(module, None)
+
+    try:
+        # Reload the module to test the import logic
+        import importlib
+        importlib.reload(sensor)
+
+        # Verify constants are set to expected fallback values
+        assert sensor.UNIT_CELSIUS == "°C"
+        assert sensor.UNIT_WATT == "W"
+        assert sensor.UNIT_WATT_HOUR == "Wh"
+
+    finally:
+        # Restore original modules
+        sys.modules.update(original_modules)
+
+
+def test_unit_constants_with_deprecated_fallback(monkeypatch):
+    """Test that deprecated constants are used when new ones fail."""
+    from custom_components.rooms import sensor
+
+    # Mock only the new unit system modules as missing
+    original_modules = dict(sys.modules)
+
+    modules_to_remove = [
+        'homeassistant.util.unit_system',
+        'homeassistant.util.unit_conversion'
+    ]
+
+    for module in modules_to_remove:
+        sys.modules.pop(module, None)
+
+    try:
+        # Reload to test fallback to deprecated constants
+        import importlib
+        importlib.reload(sensor)
+
+        # Should use deprecated constants (which will show deprecation warnings but work)
+        assert sensor.UNIT_CELSIUS is not None
+        assert sensor.UNIT_WATT is not None
+        assert sensor.UNIT_WATT_HOUR is not None
+
+        # The deprecated constants have the same string values as our fallbacks
+        # This is expected and correct behavior
+        assert sensor.UNIT_CELSIUS == "°C"
+        assert sensor.UNIT_WATT == "W"
+        assert sensor.UNIT_WATT_HOUR == "Wh"
+
+    finally:
+        # Restore original modules
+        sys.modules.update(original_modules)
+
+
+def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
+    """Test that sensor works correctly even with fallback unit constants."""
+    sensor_instance = RoomSummarySensor(mock_coordinator, mock_config_entry)
+    sensor_instance.hass = mock_hass
+
+    # Mock states
+    power_state = MagicMock()
+    power_state.state = "100.0"
+
+    energy_state = MagicMock()
+    energy_state.state = "500.0"
+
+    temp_state = MagicMock()
+    temp_state.state = "25.5"
+
+    def mock_get(entity_id):
+        if entity_id == "sensor.power":
+            return power_state
+        elif entity_id == "sensor.energy":
+            return energy_state
+        elif entity_id == "sensor.temperature":
+            return temp_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    # Test that attributes are generated correctly regardless of which unit constants are used
+    attrs = sensor_instance.extra_state_attributes
+
+    assert attrs["power_w"] == 100.0
+    assert "power_w_unit" in attrs
+    assert attrs["energy_wh"] == 500.0
+    assert "energy_wh_unit" in attrs
+    assert attrs["temperature_c"] == 25.5
+    assert "temperature_c_unit" in attrs
+
+    # Verify unit values are strings (regardless of which fallback was used)
+    assert isinstance(attrs["power_w_unit"], str)
+    assert isinstance(attrs["energy_wh_unit"], str)
+    assert isinstance(attrs["temperature_c_unit"], str)

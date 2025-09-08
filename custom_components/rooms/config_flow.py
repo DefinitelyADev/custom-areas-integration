@@ -18,7 +18,6 @@ from .const import (
     CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
-    DEFAULT_ACTIVE_THRESHOLD,
     DOMAIN,
 )
 
@@ -43,12 +42,12 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(user_input[CONF_ROOM_NAME])
             self._abort_if_unique_id_configured()
 
-            return self.async_create_entry(
+            return await self.async_create_entry(
                 title=user_input[CONF_ROOM_NAME],
                 data=user_input,
             )
 
-        return self.async_show_form(
+        return await self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_ROOM_NAME): str,
@@ -73,7 +72,7 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CLIMATE_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="climate")
                 ),
-                vol.Optional(CONF_ACTIVE_THRESHOLD, default=DEFAULT_ACTIVE_THRESHOLD): vol.All(
+                vol.Optional(CONF_ACTIVE_THRESHOLD): vol.All(
                     vol.Coerce(float), vol.Range(min=0)
                 ),
             }),

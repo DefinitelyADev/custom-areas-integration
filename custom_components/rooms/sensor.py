@@ -1,27 +1,34 @@
 """Sensor platform for Rooms integration."""
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-import voluptuous as vol
-
-from homeassistant.components.sensor import (
-    SensorEntity,
-)
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    PERCENTAGE,
-    STATE_ON,
-    STATE_OFF,
-    TEMP_CELSIUS,
-    POWER_WATT,
-    ENERGY_WATT_HOUR,
-)
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import device_registry as dr
+from homeassistant.const import PERCENTAGE, STATE_ON
+from homeassistant.core import HomeAssistant, callback, Event
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
+
+# Try to import unit constants, fall back to local definitions if not available
+try:
+    from homeassistant.util.unit_system import UnitOfTemperature
+    from homeassistant.util.unit_conversion import UnitOfPower, UnitOfEnergy
+    UNIT_CELSIUS = UnitOfTemperature.CELSIUS
+    UNIT_WATT = UnitOfPower.WATT
+    UNIT_WATT_HOUR = UnitOfEnergy.WATT_HOUR
+except ImportError:
+    # Fallback for older versions or if unit system constants don't exist
+    try:
+        from homeassistant.const import TEMP_CELSIUS, POWER_WATT, ENERGY_WATT_HOUR
+        UNIT_CELSIUS = TEMP_CELSIUS
+        UNIT_WATT = POWER_WATT
+        UNIT_WATT_HOUR = ENERGY_WATT_HOUR
+    except ImportError:
+        # Final fallback for versions where these constants don't exist
+        UNIT_CELSIUS = "°C"
+        UNIT_WATT = "W"
+        UNIT_WATT_HOUR = "Wh"
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -34,15 +41,11 @@ from .const import (
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     DEFAULT_ACTIVE_THRESHOLD,
-    DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_TEMPERATURE,
     DOMAIN,
     ICON_HOME,
     ICON_MOTION,
     ICON_WINDOW_OPEN,
     STATE_ACTIVE,
-    STATE_CLASS_MEASUREMENT,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
@@ -99,12 +102,14 @@ class RoomSensorCoordinator:
             )
 
     @callback
-    def _handle_state_change(self, event):
+    def _handle_state_change(self, event: Event) -> None:
         """Handle state change events."""
         if self._summary_sensor:
-            self._summary_sensor.async_schedule_update_ha_state()
+            self.hass.async_create_task(
+                self._summary_sensor.async_schedule_update_ha_state()
+            )
 
-    def register_summary_sensor(self, sensor):
+    def register_summary_sensor(self, sensor: "RoomSummarySensor") -> None:
         """Register the summary sensor."""
         self._summary_sensor = sensor
 
@@ -135,6 +140,21 @@ class RoomSummarySensor(SensorEntity):
             manufacturer="Rooms Integration",
             model="Room Sensor",
         )
+
+    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
+        """Get numeric state from entity, with fallback to default."""
+        if not entity_id:
+            return None
+        
+        state = self.hass.states.get(entity_id)
+        if state:
+            try:
+                value = float(state.state)
+                return value if value != 0.0 else default_value
+            except (ValueError, TypeError) as err:
+                _LOGGER.debug("Failed to convert state %s for entity %s: %s", state.state, entity_id, err)
+                pass
+        return None
 
     @property
     def state(self) -> str:
@@ -204,73 +224,58 @@ class RoomSummarySensor(SensorEntity):
         attrs = {}
         data = self.config_entry.data
 
-        # Core attributes
+        # Cache state lookups for performance
+        cached_states = {}
+        
+        def get_cached_state(entity_id: str):
+            """Get state with caching to avoid multiple lookups."""
+            if entity_id not in cached_states:
+                cached_states[entity_id] = self.hass.states.get(entity_id)
+            return cached_states[entity_id]
+
+        # Core attributes with consistent error handling
         power_entity = data.get(CONF_POWER_ENTITY)
         if power_entity:
-            power_state = self.hass.states.get(power_entity)
-            if power_state:
-                try:
-                    attrs["power_w"] = float(power_state.state)
-                    attrs["power_w_unit"] = POWER_WATT
-                except (ValueError, TypeError):
-                    attrs["power_w"] = 0.0
-                    attrs["power_w_unit"] = POWER_WATT
-            else:
-                attrs["power_w"] = 0.0
-                attrs["power_w_unit"] = POWER_WATT
+            attrs["power_w"] = self._get_numeric_state(power_entity, 0.0) or 0.0
+            attrs["power_w_unit"] = UNIT_WATT
 
         energy_entity = data.get(CONF_ENERGY_ENTITY)
         if energy_entity:
-            energy_state = self.hass.states.get(energy_entity)
-            if energy_state:
-                try:
-                    attrs["energy_wh"] = float(energy_state.state)
-                    attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
-                except (ValueError, TypeError):
-                    attrs["energy_wh"] = 0.0
-                    attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
-            else:
-                attrs["energy_wh"] = 0.0
-                attrs["energy_wh_unit"] = ENERGY_WATT_HOUR
+            attrs["energy_wh"] = self._get_numeric_state(energy_entity, 0.0) or 0.0
+            attrs["energy_wh_unit"] = UNIT_WATT_HOUR
 
         temp_entity = data.get(CONF_TEMP_ENTITY)
         if temp_entity:
-            temp_state = self.hass.states.get(temp_entity)
-            if temp_state:
-                try:
-                    attrs["temperature_c"] = float(temp_state.state)
-                    attrs["temperature_c_unit"] = TEMP_CELSIUS
-                except (ValueError, TypeError):
-                    pass
+            temp_value = self._get_numeric_state(temp_entity)
+            if temp_value is not None:  # Only add if we got a valid value
+                attrs["temperature_c"] = temp_value
+                attrs["temperature_c_unit"] = UNIT_CELSIUS
 
         humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
         if humidity_entity:
-            humidity_state = self.hass.states.get(humidity_entity)
-            if humidity_state:
-                try:
-                    attrs["humidity_pct"] = float(humidity_state.state)
-                    attrs["humidity_pct_unit"] = PERCENTAGE
-                except (ValueError, TypeError):
-                    pass
+            humidity_value = self._get_numeric_state(humidity_entity)
+            if humidity_value is not None:  # Only add if we got a valid value
+                attrs["humidity_pct"] = humidity_value
+                attrs["humidity_pct_unit"] = PERCENTAGE
 
         motion_entity = data.get(CONF_MOTION_ENTITY)
         if motion_entity:
-            motion_state = self.hass.states.get(motion_entity)
+            motion_state = get_cached_state(motion_entity)
             attrs["occupied"] = motion_state.state == STATE_ON if motion_state else False
 
         window_entity = data.get(CONF_WINDOW_ENTITY)
         if window_entity:
-            window_state = self.hass.states.get(window_entity)
+            window_state = get_cached_state(window_entity)
             attrs["window_open"] = window_state.state == STATE_ON if window_state else False
 
         climate_entity = data.get(CONF_CLIMATE_ENTITY)
         if climate_entity:
-            climate_state = self.hass.states.get(climate_entity)
+            climate_state = get_cached_state(climate_entity)
             if climate_state:
                 attrs["climate_mode"] = climate_state.state
                 if climate_state.attributes.get("temperature"):
                     attrs["climate_target_c"] = climate_state.attributes["temperature"]
-                    attrs["climate_target_c_unit"] = TEMP_CELSIUS
+                    attrs["climate_target_c_unit"] = UNIT_CELSIUS
 
         return attrs
 

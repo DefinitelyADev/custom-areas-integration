@@ -1,13 +1,10 @@
 """Rooms integration for Home Assistant."""
-import asyncio
 import logging
-from typing import Any, Dict, List, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 
 from .const import DOMAIN
 from .sensor import RoomSensorCoordinator
@@ -40,7 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-        entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+        await entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
         return True
 
