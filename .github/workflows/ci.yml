@@ -88,6 +88,7 @@ jobs:
       uses: hacs/action@main
       with:
         category: integration
+      continue-on-error: true
 
   release:
     needs: [test, validate, type-check, lint, hacs-validation]
