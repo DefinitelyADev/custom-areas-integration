@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.rooms.const import (
     CONF_ACTIVE_THRESHOLD,
+    CONF_ENERGY_ENTITY,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_ROOM_NAME,
@@ -30,6 +31,7 @@ def mock_config_entry():
     entry.data = {
         CONF_ROOM_NAME: "Test Room",
         CONF_POWER_ENTITY: "sensor.power",
+        CONF_ENERGY_ENTITY: "sensor.energy",
         CONF_TEMP_ENTITY: "sensor.temperature",
         CONF_MOTION_ENTITY: "binary_sensor.motion",
         CONF_WINDOW_ENTITY: "binary_sensor.window",
@@ -153,6 +155,9 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     power_state = MagicMock()
     power_state.state = "25.5"
 
+    energy_state = MagicMock()
+    energy_state.state = "150.0"
+
     temp_state = MagicMock()
     temp_state.state = "22.3"
 
@@ -162,6 +167,8 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     def mock_get(entity_id):
         if entity_id == "sensor.power":
             return power_state
+        elif entity_id == "sensor.energy":
+            return energy_state
         elif entity_id == "sensor.temperature":
             return temp_state
         elif entity_id == "binary_sensor.motion":
@@ -173,6 +180,7 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     attrs = sensor.extra_state_attributes
 
     assert attrs["power_w"] == 25.5
+    assert attrs["energy_wh"] == 150.0
     assert attrs["temperature_c"] == 22.3
     assert attrs["occupied"] is True
 

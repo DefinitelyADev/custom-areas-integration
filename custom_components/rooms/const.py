@@ -3,6 +3,7 @@
 DOMAIN = "rooms"
 CONF_ROOM_NAME = "room_name"
 CONF_POWER_ENTITY = "power_entity"
+CONF_ENERGY_ENTITY = "energy_entity"
 CONF_TEMP_ENTITY = "temp_entity"
 CONF_HUMIDITY_ENTITY = "humidity_entity"
 CONF_MOTION_ENTITY = "motion_entity"

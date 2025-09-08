@@ -51,6 +51,7 @@ Not affiliated with Home Assistant — just vibing on top of it.
 3. Configure your room:
    - **Room Name**: Display name for the room
    - **Power Sensor**: Optional sensor for power consumption
+   - **Energy Sensor**: Optional sensor for energy consumption
    - **Temperature Sensor**: Optional temperature sensor
    - **Humidity Sensor**: Optional humidity sensor
    - **Motion Sensor**: Optional motion detection sensor
@@ -69,6 +70,7 @@ Each room creates a summary sensor with these states:
 
 The summary sensor includes these attributes:
 - `power_w`: Current power consumption
+- `energy_wh`: Current energy consumption
 - `temperature_c`: Current temperature
 - `humidity_pct`: Current humidity percentage
 - `occupied`: Motion detection status

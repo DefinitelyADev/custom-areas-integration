@@ -11,6 +11,7 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_ACTIVE_THRESHOLD,
     CONF_CLIMATE_ENTITY,
+    CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
@@ -52,6 +53,9 @@ class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_ROOM_NAME): str,
                 vol.Optional(CONF_POWER_ENTITY): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                vol.Optional(CONF_ENERGY_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
                 vol.Optional(CONF_TEMP_ENTITY): selector.EntitySelector(

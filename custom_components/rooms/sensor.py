@@ -23,6 +23,7 @@ from homeassistant.helpers.event import async_track_state_change_event
 from .const import (
     CONF_ACTIVE_THRESHOLD,
     CONF_CLIMATE_ENTITY,
+    CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
@@ -76,6 +77,7 @@ class RoomSensorCoordinator:
         # Add core entities
         for key in [
             CONF_POWER_ENTITY,
+            CONF_ENERGY_ENTITY,
             CONF_TEMP_ENTITY,
             CONF_HUMIDITY_ENTITY,
             CONF_MOTION_ENTITY,
@@ -209,6 +211,17 @@ class RoomSummarySensor(SensorEntity):
                     attrs["power_w"] = 0.0
             else:
                 attrs["power_w"] = 0.0
+
+        energy_entity = data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            energy_state = self.hass.states.get(energy_entity)
+            if energy_state:
+                try:
+                    attrs["energy_wh"] = float(energy_state.state)
+                except (ValueError, TypeError):
+                    attrs["energy_wh"] = 0.0
+            else:
+                attrs["energy_wh"] = 0.0
 
         temp_entity = data.get(CONF_TEMP_ENTITY)
         if temp_entity:
