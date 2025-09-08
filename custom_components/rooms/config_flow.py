@@ -24,7 +24,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class RoomsConfigFlow(config_entries.ConfigFlow):
+class RoomsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Rooms."""
 
     VERSION = 1
