@@ -6,10 +6,10 @@ from typing import Any, Callable, Dict, Optional
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, STATE_ON
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import async_track_state_change_event
 
 # Try to import unit constants, fall back to local definitions if not available
 try:
@@ -103,19 +103,32 @@ class RoomSensorCoordinator:
 
         if entities_to_track:
             _LOGGER.debug(
-                "Calling async_track_state_change with entities: %s", entities_to_track
+                "Calling async_track_state_change_event with entities: %s",
+                entities_to_track,
             )
-            listener = async_track_state_change(
+            listener = async_track_state_change_event(
                 self.hass, entities_to_track, self._handle_state_change
             )
             self._listeners.append(listener)
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
-    async def _handle_state_change(self, entity_id: str, old_state, new_state) -> None:
+    def _handle_state_change(self, event: Event) -> None:
         """Handle state change events."""
         if self._summary_sensor:
-            await self._summary_sensor.async_schedule_update_ha_state()
+            # Extract data from event
+            event_data = event.data
+            entity_id = event_data.get("entity_id")
+            old_state = event_data.get("old_state")
+            new_state = event_data.get("new_state")
+
+            _LOGGER.debug(
+                "State change for %s: %s -> %s", entity_id, old_state, new_state
+            )
+
+            self.hass.async_create_task(
+                self._summary_sensor.async_schedule_update_ha_state()
+            )
         return
 
     def register_summary_sensor(self, sensor: "RoomSummarySensor") -> None:
