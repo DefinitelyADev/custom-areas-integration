@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3] - 2025-09-09
+
+### Fixed
+- Ensure entity_id keeps `room_` prefix using `suggested_object_id` while keeping the display name clean (just the room name). Existing entities may need a manual rename or re-add to pick up the new object_id.
+
 ## [0.0.2] - 2025-09-09
 
 ### Changed
