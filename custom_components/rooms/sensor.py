@@ -106,10 +106,8 @@ class RoomSensorCoordinator:
                 "Calling async_track_state_change_event with entities: %s",
                 entities_to_track,
             )
-            listener = async_track_state_change_event(
-                self.hass, entities_to_track, self._handle_state_change
-            )
-            self._listeners.append(listener)
+            listener = async_track_state_change_event(self.hass, entities_to_track, self._handle_state_change)
+            self._listeners.append(listener)  # pyright: ignore[reportArgumentType]
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
@@ -122,13 +120,9 @@ class RoomSensorCoordinator:
             old_state = event_data.get("old_state")
             new_state = event_data.get("new_state")
 
-            _LOGGER.debug(
-                "State change for %s: %s -> %s", entity_id, old_state, new_state
-            )
+            _LOGGER.debug("State change for %s: %s -> %s", entity_id, old_state, new_state)
 
-            self.hass.async_create_task(
-                self._summary_sensor.async_schedule_update_ha_state()
-            )
+            self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
     def register_summary_sensor(self, sensor: "RoomSummarySensor") -> None:
@@ -144,9 +138,7 @@ class RoomSensorCoordinator:
 class RoomSummarySensor(SensorEntity):
     """Room summary sensor."""
 
-    def __init__(
-        self, coordinator: RoomSensorCoordinator, config_entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: RoomSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
@@ -165,9 +157,7 @@ class RoomSummarySensor(SensorEntity):
             model="Room Sensor",
         )
 
-    def _get_numeric_state(
-        self, entity_id: str, default_value: float = 0.0
-    ) -> Optional[float]:
+    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
         """Get numeric state from entity, with fallback to default."""
         if not entity_id:
             return None
@@ -292,16 +282,12 @@ class RoomSummarySensor(SensorEntity):
         motion_entity = data.get(CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = get_cached_state(motion_entity)
-            attrs["occupied"] = (
-                motion_state.state == STATE_ON if motion_state else False
-            )
+            attrs["occupied"] = motion_state.state == STATE_ON if motion_state else False
 
         window_entity = data.get(CONF_WINDOW_ENTITY)
         if window_entity:
             window_state = get_cached_state(window_entity)
-            attrs["window_open"] = (
-                window_state.state == STATE_ON if window_state else False
-            )
+            attrs["window_open"] = window_state.state == STATE_ON if window_state else False
 
         climate_entity = data.get(CONF_CLIMATE_ENTITY)
         if climate_entity:

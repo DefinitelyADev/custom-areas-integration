@@ -33,11 +33,11 @@ def main():
         return 1
 
     # Run custom validation
-    if not run_command("python validate.py", "Custom validation"):
+    if not run_command("python3 validate.py", "Custom validation"):
         all_passed = False
 
     # Run tests
-    if not run_command("python run_tests.py", "Tests"):
+    if not run_command("python3 run_tests.py", "Tests"):
         all_passed = False
 
     # Run type checking
@@ -45,14 +45,10 @@ def main():
         all_passed = False
 
     # Run linting
-    if not run_command(
-        "black --check --diff custom_components/rooms/", "Black formatting check"
-    ):
+    if not run_command("black --check --diff custom_components/rooms/", "Black formatting check"):
         all_passed = False
 
-    if not run_command(
-        "isort --check-only --diff custom_components/rooms/", "Import sorting check"
-    ):
+    if not run_command("isort --check-only --diff custom_components/rooms/", "Import sorting check"):
         all_passed = False
 
     if not run_command("flake8 custom_components/rooms/", "Flake8 linting"):
