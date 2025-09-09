@@ -142,7 +142,7 @@ class RoomSummarySensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        self._attr_name = f"room_{config_entry.data[CONF_ROOM_NAME]}"
+        self._attr_name = f"{config_entry.data[CONF_ROOM_NAME]}"
         self._attr_unique_id = f"room_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
