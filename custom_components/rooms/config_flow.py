@@ -47,6 +47,10 @@ class RoomsConfigFlow(
             await self.async_set_unique_id(user_input[CONF_ROOM_NAME])
             self._abort_if_unique_id_configured()
 
+            # Ensure icon has a default value if not provided
+            if CONF_ICON not in user_input or user_input[CONF_ICON] is None:
+                user_input[CONF_ICON] = DEFAULT_ICON
+
             return self.async_create_entry(
                 title=user_input[CONF_ROOM_NAME],
                 data=user_input,
@@ -57,8 +61,8 @@ class RoomsConfigFlow(
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_ROOM_NAME): str,
-                    vol.Optional(CONF_ICON, default=DEFAULT_ICON): getattr(selector, "IconSelector")(
-                        getattr(selector, "IconSelectorConfig")()
+                    vol.Optional(CONF_ICON): selector.IconSelector(
+                        selector.IconSelectorConfig(placeholder="mdi:texture-box")
                     ),
                     vol.Optional(CONF_POWER_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain="sensor")

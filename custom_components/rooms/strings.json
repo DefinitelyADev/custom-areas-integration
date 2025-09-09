@@ -13,7 +13,8 @@
           "motion_entity": "Motion Sensor (optional)",
           "window_entity": "Window Sensor (optional)",
           "climate_entity": "Climate Entity (optional)",
-          "active_threshold": "Active Power Threshold (W)"
+          "active_threshold": "Active Power Threshold (W)",
+          "icon": "Icon (optional)"
         }
       }
     },
@@ -39,7 +40,8 @@
           "motion_entity": "Motion Sensor (optional)",
           "window_entity": "Window Sensor (optional)",
           "climate_entity": "Climate Entity (optional)",
-          "active_threshold": "Active Power Threshold (W)"
+          "active_threshold": "Active Power Threshold (W)",
+          "icon": "Icon (optional)"
         }
       }
     }

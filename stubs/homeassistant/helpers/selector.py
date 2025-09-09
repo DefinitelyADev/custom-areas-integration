@@ -8,7 +8,7 @@ class Selector:
 
     def __init__(
         self,
-        config: Union[Dict[str, Any], "EntitySelectorConfig", "TextSelectorConfig"],
+        config: Union[Dict[str, Any], "EntitySelectorConfig", "TextSelectorConfig", "IconSelectorConfig"],
     ) -> None:
         """Initialize selector."""
         ...
@@ -41,6 +41,18 @@ class TextSelectorConfig:
         ...
 
 
+class IconSelectorConfig:
+    """Configuration for icon selector."""
+
+    def __init__(
+        self,
+        *,
+        placeholder: Optional[str] = None,
+    ) -> None:
+        """Initialize icon selector config."""
+        ...
+
+
 class EntitySelector(Selector):
     """Entity selector."""
 
@@ -67,4 +79,17 @@ class TextSelector(Selector):
         type: Optional[str] = None,
     ) -> None:
         """Initialize text selector."""
+        ...
+
+
+class IconSelector(Selector):
+    """Icon selector."""
+
+    def __init__(
+        self,
+        config: Optional[Union[Dict[str, Any], IconSelectorConfig]] = None,
+        *,
+        placeholder: Optional[str] = None,
+    ) -> None:
+        """Initialize icon selector."""
         ...
