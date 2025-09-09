@@ -44,6 +44,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     except Exception as ex:
         _LOGGER.error("Error setting up rooms integration: %s", ex)
+        _LOGGER.error("Exception type: %s", type(ex).__name__)
+        import traceback
+
+        _LOGGER.error("Full traceback: %s", traceback.format_exc())
         raise ConfigEntryNotReady from ex
 
 
