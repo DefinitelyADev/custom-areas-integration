@@ -57,7 +57,9 @@ class RoomsConfigFlow(
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_ROOM_NAME): str,
-                    vol.Optional(CONF_ICON, default=DEFAULT_ICON): str,
+                    vol.Optional(CONF_ICON, default=DEFAULT_ICON): getattr(selector, "IconSelector")(
+                        getattr(selector, "IconSelectorConfig")()
+                    ),
                     vol.Optional(CONF_POWER_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain="sensor")
                     ),
