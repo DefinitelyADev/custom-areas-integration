@@ -13,6 +13,7 @@ A custom integration for Home Assistant that creates composite "Room" sensors wi
 
 📖 **Complete Documentation**: [docs/](docs/)
 
+- **[Design Rationale](docs/rationale.md)** - Why this exists and how it pairs with CFHAC/Area-like UX
 - **[API Reference](docs/api.md)** - Entity states, attributes, and configuration schema
 - **[Configuration Examples](docs/examples.md)** - Real-world setup examples and use cases
 - **[Developer Guide](docs/developer.md)** - Architecture overview and development setup
@@ -86,6 +87,12 @@ The summary sensor includes these attributes:
 - `window_open`: Window/door status
 - `climate_mode`: Current climate mode
    - `climate_target_c` (numeric) and `climate_target` (string with unit)
+
+### Area vs Tile (with CFHAC)
+
+If you want to mimic the Area card using a Tile card with CFHAC features and the room summary sensor:
+
+![Area card vs Tile card with CFHAC](docs/images/area-vs-tile.png)
 
 ## State Logic
 

@@ -5,6 +5,7 @@ This directory contains comprehensive documentation for the Rooms integration.
 ## Files
 
 - **`index.md`** - Documentation overview and quick start guide
+- **`rationale.md`** - Design rationale and goals of the integration
 - **`api.md`** - Complete API reference for entities, states, and attributes
 - **`examples.md`** - Configuration examples and use cases
 - **`developer.md`** - Architecture overview and development guide

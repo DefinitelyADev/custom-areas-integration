@@ -25,6 +25,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Design Rationale: rationale.md
   - API Reference: api.md
   - Configuration Examples: examples.md
   - Developer Guide: developer.md
