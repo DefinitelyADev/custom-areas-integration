@@ -36,9 +36,7 @@ class RoomsConfigFlow(
         """Initialize the config flow."""
         self._data = {}
 
-    async def async_step_user(
-        self, user_input: Optional[Dict[str, Any]] = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None) -> FlowResult:
         """Handle the initial step."""
         errors: Dict[str, str] = {}
 
@@ -50,7 +48,7 @@ class RoomsConfigFlow(
             return self.async_create_entry(
                 title=user_input[CONF_ROOM_NAME],
                 data=user_input,
-            )
+            )  # pyright: ignore[reportReturnType]
 
         return self.async_show_form(
             step_id="user",
@@ -78,10 +76,8 @@ class RoomsConfigFlow(
                     vol.Optional(CONF_CLIMATE_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain="climate")
                     ),
-                    vol.Optional(CONF_ACTIVE_THRESHOLD): vol.All(
-                        vol.Coerce(float), vol.Range(min=0)
-                    ),
+                    vol.Optional(CONF_ACTIVE_THRESHOLD): vol.All(vol.Coerce(float), vol.Range(min=0)),
                 }
             ),
             errors=errors,
-        )
+        )  # pyright: ignore[reportReturnType]

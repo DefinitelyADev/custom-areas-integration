@@ -78,14 +78,14 @@ Each room creates a summary sensor with these states:
 - **unknown**: No entities configured for the room
 
 The summary sensor includes these attributes:
-- `power_w`: Current power consumption
-- `energy_wh`: Current energy consumption
-- `temperature_c`: Current temperature
-- `humidity_pct`: Current humidity percentage
+- `power_w` (numeric) and `power` (string with unit, e.g. "28.6 W")
+- `energy_wh` (numeric) and `energy` (string with unit, e.g. "12.3 Wh")
+- `temperature_c` (numeric) and `temperature` (string with unit, e.g. "21.5 °C")
+- `humidity_pct` (numeric) and `humidity` (string with unit, e.g. "45 %")
 - `occupied`: Motion detection status
 - `window_open`: Window/door status
 - `climate_mode`: Current climate mode
-- `climate_target_c`: Target temperature setting
+   - `climate_target_c` (numeric) and `climate_target` (string with unit)
 
 ## State Logic
 

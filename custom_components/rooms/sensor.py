@@ -242,7 +242,7 @@ class RoomSummarySensor(SensorEntity):
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
-        attrs = {}
+        attrs: Dict[str, Any] = {}
         data = self.config_entry.data
 
         # Cache state lookups for performance
@@ -254,30 +254,63 @@ class RoomSummarySensor(SensorEntity):
                 cached_states[entity_id] = self.hass.states.get(entity_id)
             return cached_states[entity_id]
 
+        def fmt(value: Optional[float], unit: str) -> Optional[str]:
+            """Format a numeric value with its unit for nice display.
+
+            Keep numbers compact: no trailing zeros, max 1 decimal place by default.
+            Returns None if value is None.
+            """
+            if value is None:
+                return None
+            try:
+                # Show up to 1 decimal place; strip trailing zeros/period
+                text = f"{float(value):.1f}".rstrip("0").rstrip(".")
+            except (TypeError, ValueError):
+                return None
+            return f"{text} {unit}"
+
         # Core attributes with consistent error handling
         power_entity = data.get(CONF_POWER_ENTITY)
         if power_entity:
-            attrs["power_w"] = self._get_numeric_state(power_entity, 0.0) or 0.0
-            attrs["power_w_unit"] = UNIT_WATT
+            power_val = self._get_numeric_state(power_entity, 0.0) or 0.0
+            # Numeric attribute for automations
+            attrs["power_w"] = power_val
+            # Display-friendly attribute (value with unit)
+            power_disp = fmt(power_val, UNIT_WATT)
+            if power_disp is not None:
+                attrs["power"] = power_disp
 
         energy_entity = data.get(CONF_ENERGY_ENTITY)
         if energy_entity:
-            attrs["energy_wh"] = self._get_numeric_state(energy_entity, 0.0) or 0.0
-            attrs["energy_wh_unit"] = UNIT_WATT_HOUR
+            energy_val = self._get_numeric_state(energy_entity, 0.0) or 0.0
+            # Numeric attribute for automations
+            attrs["energy_wh"] = energy_val
+            # Display-friendly attribute
+            energy_disp = fmt(energy_val, UNIT_WATT_HOUR)
+            if energy_disp is not None:
+                attrs["energy"] = energy_disp
 
         temp_entity = data.get(CONF_TEMP_ENTITY)
         if temp_entity:
             temp_value = self._get_numeric_state(temp_entity)
             if temp_value is not None:  # Only add if we got a valid value
+                # Numeric attribute for automations
                 attrs["temperature_c"] = temp_value
-                attrs["temperature_c_unit"] = UNIT_CELSIUS
+                # Display-friendly attribute
+                temp_disp = fmt(temp_value, UNIT_CELSIUS)
+                if temp_disp is not None:
+                    attrs["temperature"] = temp_disp
 
         humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
         if humidity_entity:
             humidity_value = self._get_numeric_state(humidity_entity)
             if humidity_value is not None:  # Only add if we got a valid value
+                # Numeric attribute for automations
                 attrs["humidity_pct"] = humidity_value
-                attrs["humidity_pct_unit"] = PERCENTAGE
+                # Display-friendly attribute
+                humidity_disp = fmt(humidity_value, PERCENTAGE)
+                if humidity_disp is not None:
+                    attrs["humidity"] = humidity_disp
 
         motion_entity = data.get(CONF_MOTION_ENTITY)
         if motion_entity:
@@ -295,7 +328,10 @@ class RoomSummarySensor(SensorEntity):
             if climate_state:
                 attrs["climate_mode"] = climate_state.state
                 if climate_state.attributes.get("temperature"):
-                    attrs["climate_target_c"] = climate_state.attributes["temperature"]
-                    attrs["climate_target_c_unit"] = UNIT_CELSIUS
+                    t = climate_state.attributes["temperature"]
+                    attrs["climate_target_c"] = t
+                    t_disp = fmt(t, UNIT_CELSIUS)
+                    if t_disp is not None:
+                        attrs["climate_target"] = t_disp
 
         return attrs

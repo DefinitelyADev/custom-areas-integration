@@ -55,9 +55,7 @@ def mock_coordinator(mock_hass, mock_config_entry):
     return coordinator
 
 
-def test_room_summary_sensor_initialization(
-    mock_coordinator, mock_config_entry, mock_hass
-):
+def test_room_summary_sensor_initialization(mock_coordinator, mock_config_entry, mock_hass):
     """Test room summary sensor initialization."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -67,9 +65,7 @@ def test_room_summary_sensor_initialization(
     assert sensor.should_poll is False
 
 
-def test_room_summary_sensor_state_unknown(
-    mock_coordinator, mock_config_entry, mock_hass
-):
+def test_room_summary_sensor_state_unknown(mock_coordinator, mock_config_entry, mock_hass):
     """Test room summary sensor state when no entities configured."""
     # Configure entry with no entities
     mock_config_entry.data = {CONF_ROOM_NAME: "Test Room"}
@@ -107,9 +103,7 @@ def test_room_summary_sensor_state_idle(mock_coordinator, mock_config_entry, moc
     assert sensor.state == STATE_IDLE
 
 
-def test_room_summary_sensor_state_active_motion(
-    mock_coordinator, mock_config_entry, mock_hass
-):
+def test_room_summary_sensor_state_active_motion(mock_coordinator, mock_config_entry, mock_hass):
     """Test room summary sensor state when motion detected."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -128,9 +122,7 @@ def test_room_summary_sensor_state_active_motion(
     assert sensor.state == STATE_ACTIVE
 
 
-def test_room_summary_sensor_state_active_power(
-    mock_coordinator, mock_config_entry, mock_hass
-):
+def test_room_summary_sensor_state_active_power(mock_coordinator, mock_config_entry, mock_hass):
     """Test room summary sensor state when power above threshold."""
     sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -188,12 +180,14 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     attrs = sensor.extra_state_attributes
 
     assert attrs["power_w"] == 25.5
-    assert attrs["power_w_unit"] == "W"
     assert attrs["energy_wh"] == 150.0
-    assert attrs["energy_wh_unit"] == "Wh"
     assert attrs["temperature_c"] == 22.3
-    assert attrs["temperature_c_unit"] == "°C"
     assert attrs["occupied"] is True
+
+    # Display attributes should include units in their strings
+    assert attrs["power"].endswith(" W")
+    assert attrs["energy"].endswith(" Wh")
+    assert attrs["temperature"].endswith(" °C")
 
 
 def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
@@ -299,9 +293,7 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
         sys.modules.update(original_modules)
 
 
-def test_sensor_functionality_with_fallback_units(
-    mock_coordinator, mock_config_entry, mock_hass
-):
+def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
     """Test that sensor works correctly even with fallback unit constants."""
     sensor_instance = RoomSummarySensor(mock_coordinator, mock_config_entry)
     sensor_instance.hass = mock_hass
@@ -332,13 +324,10 @@ def test_sensor_functionality_with_fallback_units(
     attrs = sensor_instance.extra_state_attributes
 
     assert attrs["power_w"] == 100.0
-    assert "power_w_unit" in attrs
     assert attrs["energy_wh"] == 500.0
-    assert "energy_wh_unit" in attrs
     assert attrs["temperature_c"] == 25.5
-    assert "temperature_c_unit" in attrs
 
-    # Verify unit values are strings (regardless of which fallback was used)
-    assert isinstance(attrs["power_w_unit"], str)
-    assert isinstance(attrs["energy_wh_unit"], str)
-    assert isinstance(attrs["temperature_c_unit"], str)
+    # Display attributes should exist and contain units
+    assert isinstance(attrs.get("power"), str) and attrs["power"].endswith(" W")
+    assert isinstance(attrs.get("energy"), str) and attrs["energy"].endswith(" Wh")
+    assert isinstance(attrs.get("temperature"), str) and attrs["temperature"].endswith(" °C")

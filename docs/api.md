@@ -19,26 +19,23 @@ sensor.room_<room_name>_summary
 
 ### Attributes
 
-| Attribute | Type | Unit | Description |
-|-----------|------|------|-------------|
-| `power_w` | float | W | Current power consumption |
-| `energy_wh` | float | Wh | Current energy consumption |
-| `temperature_c` | float | °C | Current temperature |
-| `humidity_pct` | float | % | Current humidity percentage |
-| `occupied` | boolean | - | Motion detection status |
-| `window_open` | boolean | - | Window/door status |
-| `climate_mode` | string | - | Current climate mode |
-| `climate_target_c` | float | °C | Target temperature setting |
+The room sensor exposes both numeric attributes (useful for automations) and display attributes that include units in a single string for easy UI usage.
 
-### Unit Attributes
-
-Each numeric attribute also includes a corresponding unit attribute:
-
-- `power_w_unit`: Always "W"
-- `energy_wh_unit`: Always "Wh"
-- `temperature_c_unit`: Always "°C"
-- `humidity_pct_unit`: Always "%"
-- `climate_target_c_unit`: Always "°C"
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `power_w` | float | Current power consumption (numeric) |
+| `power` | string | Power, formatted with unit (e.g., `28.6 W`) |
+| `energy_wh` | float | Current energy (numeric) |
+| `energy` | string | Energy, formatted with unit (e.g., `12.3 Wh`) |
+| `temperature_c` | float | Current temperature (numeric) |
+| `temperature` | string | Temperature, formatted with unit (e.g., `21.5 °C`) |
+| `humidity_pct` | float | Current humidity percentage (numeric) |
+| `humidity` | string | Humidity, formatted with unit (e.g., `45 %`) |
+| `occupied` | boolean | Motion detection status |
+| `window_open` | boolean | Window/door status |
+| `climate_mode` | string | Current climate mode |
+| `climate_target_c` | float | Target temperature (numeric) |
+| `climate_target` | string | Target temperature, formatted with unit (e.g., `21 °C`) |
 
 ## Device Registry
 

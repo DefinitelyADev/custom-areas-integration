@@ -148,12 +148,12 @@ entities:
   - entity: sensor.living_room_summary
   - type: attribute
     entity: sensor.living_room_summary
-    attribute: temperature_c
+  attribute: temperature
     name: Temperature
   - type: attribute
     entity: sensor.living_room_summary
-    attribute: power_w
-    name: Power Usage
+  attribute: power
+  name: Power
   - type: attribute
     entity: sensor.living_room_summary
     attribute: occupied

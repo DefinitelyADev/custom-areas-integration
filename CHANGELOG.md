@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2] - 2025-09-09
+
+### Changed
+- Attributes now include display-friendly values with units embedded (e.g., `power: "28.6 W"`, `temperature: "21.5 °C"`).
+- Removed separate unit attributes (`*_unit`) to simplify dashboards.
+- Kept numeric attributes for automations: `power_w`, `energy_wh`, `temperature_c`, `humidity_pct`, `climate_target_c`.
+
+### Fixed
+- Config flow now correctly awaits async methods (`async_create_entry`, `async_show_form`) to satisfy type checking.
+
+## [0.0.1] - 2025-09-08
+
 ### Added
 - Initial public release
 - UI configuration flow for easy setup
