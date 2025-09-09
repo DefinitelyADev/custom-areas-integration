@@ -146,6 +146,11 @@ class RoomSummarySensor(SensorEntity):
         self._attr_name = f"room_{config_entry.data[CONF_ROOM_NAME]}"
         self._attr_unique_id = f"room_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
+        # Ensure entity_id keeps the "room_" prefix while display name stays clean
+        room_name_val = str(config_entry.data.get(CONF_ROOM_NAME, "")).strip()
+        if room_name_val:
+            # Home Assistant will slugify this and create: sensor.room_<room_name>
+            self._attr_suggested_object_id = f"room_{room_name_val}"
 
         # Register with coordinator
         coordinator.register_summary_sensor(self)
