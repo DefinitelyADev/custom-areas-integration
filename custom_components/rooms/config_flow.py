@@ -13,11 +13,13 @@ from .const import (
     CONF_CLIMATE_ENTITY,
     CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
+    CONF_ICON,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
+    DEFAULT_ICON,
     DOMAIN,
 )
 
@@ -55,6 +57,7 @@ class RoomsConfigFlow(
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_ROOM_NAME): str,
+                    vol.Optional(CONF_ICON, default=DEFAULT_ICON): str,
                     vol.Optional(CONF_POWER_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain="sensor")
                     ),

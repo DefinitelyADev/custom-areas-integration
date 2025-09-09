@@ -38,14 +38,15 @@ from .const import (
     CONF_CLIMATE_ENTITY,
     CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
+    CONF_ICON,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     DEFAULT_ACTIVE_THRESHOLD,
+    DEFAULT_ICON,
     DOMAIN,
-    ICON_HOME,
     ICON_MOTION,
     ICON_WINDOW_OPEN,
     STATE_ACTIVE,
@@ -243,7 +244,8 @@ class RoomSummarySensor(SensorEntity):
             if motion_state and motion_state.state == STATE_ON:
                 return ICON_MOTION
 
-        return ICON_HOME
+        # Return configured icon or default
+        return str(data.get(CONF_ICON, DEFAULT_ICON))
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:

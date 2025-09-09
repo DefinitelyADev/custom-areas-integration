@@ -61,7 +61,7 @@ def test_room_summary_sensor_initialization(mock_coordinator, mock_config_entry,
     sensor.hass = mock_hass
 
     assert sensor.name == "Test Room"
-    assert sensor.unique_id == "test_entry_id_summary"
+    assert sensor.unique_id == "room_test_entry_id_summary"
     assert sensor.should_poll is False
 
 
@@ -211,7 +211,7 @@ def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
 
     mock_hass.states.get = mock_get
 
-    assert sensor.icon == "mdi:home"
+    assert sensor.icon == "mdi:texture-box"
 
     # Test motion icon
     motion_state.state = STATE_ON

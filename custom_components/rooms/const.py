@@ -10,9 +10,11 @@ CONF_MOTION_ENTITY = "motion_entity"
 CONF_WINDOW_ENTITY = "window_entity"
 CONF_CLIMATE_ENTITY = "climate_entity"
 CONF_ACTIVE_THRESHOLD = "active_threshold"
+CONF_ICON = "icon"
 
 # Default values
 DEFAULT_ACTIVE_THRESHOLD = 50.0
+DEFAULT_ICON = "mdi:texture-box"
 
 # State values
 STATE_ACTIVE = "active"
