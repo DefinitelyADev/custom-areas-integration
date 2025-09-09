@@ -142,7 +142,7 @@ class RoomSummarySensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        self._attr_name = f"{config_entry.data[CONF_ROOM_NAME]}"
+        self._attr_name = f"room_{config_entry.data[CONF_ROOM_NAME]}"
         self._attr_unique_id = f"room_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
@@ -156,6 +156,12 @@ class RoomSummarySensor(SensorEntity):
             manufacturer="Rooms Integration",
             model="Room Sensor",
         )
+
+    @property
+    def name(self) -> str:
+        """Return the name of the sensor (display name without room_ prefix)."""
+        room_name = self.config_entry.data.get(CONF_ROOM_NAME, "")
+        return str(room_name) if room_name else ""
 
     def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
         """Get numeric state from entity, with fallback to default."""
