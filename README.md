@@ -1,4 +1,6 @@
-# Custom Areas Integration for Home Assistant
+![Custom Areas Integration](/docs/images/logo.svg "Custom Areas Integration Logo")
+
+# Custom Areas Integration
 
 A custom integration for Home Assistant that creates composite "Area" sensors with UI configuration.
 
