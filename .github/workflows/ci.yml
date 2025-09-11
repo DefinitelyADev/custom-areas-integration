@@ -128,4 +128,4 @@ jobs:
         isort --check-only --diff custom_components/areas/
         flake8 custom_components/areas/
         ruff check custom_components/areas/
-        cd custom_components && python -m mypy rooms/
+        cd custom_components && python -m mypy areas/
