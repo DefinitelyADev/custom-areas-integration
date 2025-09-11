@@ -90,6 +90,14 @@ jobs:
         category: integration
       continue-on-error: true
 
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Run hassfest
+      uses: home-assistant/actions/hassfest@master
+
   release:
     needs: [test, validate, type-check, lint, hacs-validation]
     runs-on: ubuntu-latest
