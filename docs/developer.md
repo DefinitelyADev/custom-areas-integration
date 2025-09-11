@@ -2,12 +2,12 @@
 
 ## Architecture Overview
 
-The Rooms integration follows Home Assistant's standard custom integration architecture with the following components:
+The Custom Areas Integration follows Home Assistant's standard custom integration architecture with the following components:
 
 ### Core Files
 
 ```
-custom_components/rooms/
+custom_components/areas/
 ├── __init__.py          # Integration setup and lifecycle
 ├── config_flow.py       # UI configuration flow
 ├── sensor.py           # Sensor entity implementation
@@ -96,7 +96,7 @@ The project includes comprehensive tests covering:
 
 Run tests with:
 ```bash
-python -m pytest custom_components/rooms/tests/
+python -m pytest custom_components/areas/tests/
 ```
 
 ### Code Quality

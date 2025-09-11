@@ -1,7 +1,7 @@
-"""Constants for the Rooms integration."""
+"""Constants for the Custom Areas Integration."""
 
-DOMAIN = "rooms"
-CONF_ROOM_NAME = "room_name"
+DOMAIN = "areas"
+CONF_AREA_NAME = "area_name"
 CONF_POWER_ENTITY = "power_entity"
 CONF_ENERGY_ENTITY = "energy_entity"
 CONF_TEMP_ENTITY = "temp_entity"

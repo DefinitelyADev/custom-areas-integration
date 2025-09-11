@@ -1,4 +1,4 @@
-"""Test the Rooms sensors."""
+"""Test the Custom Areas Integration sensors."""
 
 import sys
 from unittest.mock import MagicMock
@@ -8,19 +8,19 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant
 
-from custom_components.rooms.const import (
+from custom_components.areas.const import (
     CONF_ACTIVE_THRESHOLD,
+    CONF_AREA_NAME,
     CONF_ENERGY_ENTITY,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
-    CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     STATE_ACTIVE,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
-from custom_components.rooms.sensor import RoomSensorCoordinator, RoomSummarySensor
+from custom_components.areas.sensor import AreaSensorCoordinator, AreaSummarySensor
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def mock_config_entry():
     entry = MagicMock(spec=ConfigEntry)
     entry.entry_id = "test_entry_id"
     entry.data = {
-        CONF_ROOM_NAME: "Test Room",
+        CONF_AREA_NAME: "Test Area",
         CONF_POWER_ENTITY: "sensor.power",
         CONF_ENERGY_ENTITY: "sensor.energy",
         CONF_TEMP_ENTITY: "sensor.temperature",
@@ -51,26 +51,26 @@ def mock_hass():
 @pytest.fixture
 def mock_coordinator(mock_hass, mock_config_entry):
     """Mock coordinator."""
-    coordinator = RoomSensorCoordinator(mock_hass, mock_config_entry)
+    coordinator = AreaSensorCoordinator(mock_hass, mock_config_entry)
     return coordinator
 
 
-def test_room_summary_sensor_initialization(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor initialization."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_initialization(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor initialization."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
-    assert sensor.name == "Test Room"
-    assert sensor.unique_id == "room_test_entry_id_summary"
+    assert sensor.name == "Test Area"
+    assert sensor.unique_id == "custom_area_test_entry_id_summary"
     assert sensor.should_poll is False
 
 
-def test_room_summary_sensor_state_unknown(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor state when no entities configured."""
+def test_area_summary_sensor_state_unknown(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor state when no entities configured."""
     # Configure entry with no entities
-    mock_config_entry.data = {CONF_ROOM_NAME: "Test Room"}
+    mock_config_entry.data = {CONF_AREA_NAME: "Test Area"}
 
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Mock hass.states.get to return None
@@ -79,9 +79,9 @@ def test_room_summary_sensor_state_unknown(mock_coordinator, mock_config_entry, 
     assert sensor.state == STATE_UNKNOWN
 
 
-def test_room_summary_sensor_state_idle(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor state when entities exist but no activity."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_state_idle(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor state when entities exist but no activity."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Mock states for entities
@@ -103,9 +103,9 @@ def test_room_summary_sensor_state_idle(mock_coordinator, mock_config_entry, moc
     assert sensor.state == STATE_IDLE
 
 
-def test_room_summary_sensor_state_active_motion(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor state when motion detected."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_state_active_motion(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor state when motion detected."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Mock motion state as ON
@@ -122,9 +122,9 @@ def test_room_summary_sensor_state_active_motion(mock_coordinator, mock_config_e
     assert sensor.state == STATE_ACTIVE
 
 
-def test_room_summary_sensor_state_active_power(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor state when power above threshold."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_state_active_power(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor state when power above threshold."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Mock power state above threshold
@@ -146,9 +146,9 @@ def test_room_summary_sensor_state_active_power(mock_coordinator, mock_config_en
     assert sensor.state == STATE_ACTIVE
 
 
-def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor attributes."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor attributes."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Mock states
@@ -190,9 +190,9 @@ def test_room_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     assert attrs["temperature"].endswith(" °C")
 
 
-def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
-    """Test room summary sensor icon selection."""
-    sensor = RoomSummarySensor(mock_coordinator, mock_config_entry)
+def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area summary sensor icon selection."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
     # Test default icon
@@ -224,7 +224,7 @@ def test_room_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
 
 def test_unit_constant_fallbacks(monkeypatch):
     """Test unit constant import fallbacks work correctly."""
-    from custom_components.rooms import sensor
+    from custom_components.areas import sensor
 
     # Mock sys.modules to simulate missing modules
     original_modules = dict(sys.modules)
@@ -257,7 +257,7 @@ def test_unit_constant_fallbacks(monkeypatch):
 
 def test_unit_constants_with_deprecated_fallback(monkeypatch):
     """Test that deprecated constants are used when new ones fail."""
-    from custom_components.rooms import sensor
+    from custom_components.areas import sensor
 
     # Mock only the new unit system modules as missing
     original_modules = dict(sys.modules)
@@ -295,7 +295,7 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
 
 def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
     """Test that sensor works correctly even with fallback unit constants."""
-    sensor_instance = RoomSummarySensor(mock_coordinator, mock_config_entry)
+    sensor_instance = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor_instance.hass = mock_hass
 
     # Mock states

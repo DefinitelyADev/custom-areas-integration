@@ -1,4 +1,4 @@
-"""Sensor platform for Rooms integration."""
+"""Sensor platform for Custom Areas Integration."""
 
 import logging
 from typing import Any, Callable, Dict, Optional
@@ -35,13 +35,13 @@ except ImportError:
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
+    CONF_AREA_NAME,
     CONF_CLIMATE_ENTITY,
     CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
     CONF_ICON,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
-    CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     DEFAULT_ACTIVE_THRESHOLD,
@@ -65,20 +65,20 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    entities = [RoomSummarySensor(coordinator, config_entry)]
+    entities = [AreaSummarySensor(coordinator, config_entry)]
 
     async_add_entities(entities)
 
 
-class RoomSensorCoordinator:
-    """Coordinator for room sensors."""
+class AreaSensorCoordinator:
+    """Coordinator for area sensors."""
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize the coordinator."""
         self.hass = hass
         self.config_entry = config_entry
         self._listeners: list[Callable[..., Any]] = []
-        self._summary_sensor: Optional["RoomSummarySensor"] = None
+        self._summary_sensor: Optional["AreaSummarySensor"] = None
 
     async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
@@ -126,7 +126,7 @@ class RoomSensorCoordinator:
             self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
-    def register_summary_sensor(self, sensor: "RoomSummarySensor") -> None:
+    def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
         """Register the summary sensor."""
         self._summary_sensor = sensor
 
@@ -136,16 +136,16 @@ class RoomSensorCoordinator:
             listener()
 
 
-class RoomSummarySensor(SensorEntity):
-    """Room summary sensor."""
+class AreaSummarySensor(SensorEntity):
+    """Area summary sensor."""
 
-    def __init__(self, coordinator: RoomSensorCoordinator, config_entry: ConfigEntry) -> None:
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        # Display name (friendly): just the room name
-        self._attr_name = str(config_entry.data.get(CONF_ROOM_NAME, ""))
-        self._attr_unique_id = f"room_{config_entry.entry_id}_summary"
+        # Display name (friendly): just the area name
+        self._attr_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
         # Register with coordinator
@@ -154,25 +154,25 @@ class RoomSummarySensor(SensorEntity):
         # Set up device info
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Room: {config_entry.data[CONF_ROOM_NAME]}",
-            manufacturer="Rooms Integration",
-            model="Room Sensor",
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
         )
 
     @property
     def name(self) -> str:
-        """Return the name of the sensor (display name without room_ prefix)."""
-        room_name = self.config_entry.data.get(CONF_ROOM_NAME, "")
-        return str(room_name) if room_name else ""
+        """Return the name of the sensor (display name without area_ prefix)."""
+        area_name = self.config_entry.data.get(CONF_AREA_NAME, "")
+        return str(area_name) if area_name else ""
 
     @property
     def suggested_object_id(self) -> Optional[str]:
-        """Suggest object_id so entity_id gets a room_ prefix.
+        """Suggest object_id so entity_id gets a area_ prefix.
 
         Home Assistant will slugify this into the final object_id.
         """
-        room_name = str(self.config_entry.data.get(CONF_ROOM_NAME, "")).strip()
-        return f"room_{room_name}" if room_name else None
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}" if area_name else None
 
     def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
         """Get numeric state from entity, with fallback to default."""

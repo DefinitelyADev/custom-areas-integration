@@ -1,6 +1,6 @@
 {
-  "domain": "rooms",
-  "name": "Rooms",
+  "domain": "areas",
+  "name": "Custom Areas Integration",
   "codeowners": ["@DefinitelyADev"],
   "config_flow": true,
   "dependencies": [],

@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains comprehensive documentation for the Rooms integration.
+This directory contains comprehensive documentation for the Custom Areas Integration.
 
 ## Files
 

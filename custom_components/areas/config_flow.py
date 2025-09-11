@@ -1,4 +1,4 @@
-"""Config flow for Rooms integration."""
+"""Config flow for Custom Areas Integration."""
 
 import logging
 from typing import Any, Dict, Optional
@@ -10,13 +10,13 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
+    CONF_AREA_NAME,
     CONF_CLIMATE_ENTITY,
     CONF_ENERGY_ENTITY,
     CONF_HUMIDITY_ENTITY,
     CONF_ICON,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
-    CONF_ROOM_NAME,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     DEFAULT_ICON,
@@ -26,10 +26,10 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class RoomsConfigFlow(
+class AreasConfigFlow(
     config_entries.ConfigFlow, domain=DOMAIN
 ):  # type: ignore[call-arg]  # HA's __init_subclass__ accepts domain parameter
-    """Handle a config flow for Rooms."""
+    """Handle a config flow for Areas."""
 
     VERSION = 1
     DOMAIN = DOMAIN
@@ -43,8 +43,8 @@ class RoomsConfigFlow(
         errors: Dict[str, str] = {}
 
         if user_input is not None:
-            # Validate room name is unique
-            await self.async_set_unique_id(user_input[CONF_ROOM_NAME])
+            # Validate area name is unique
+            await self.async_set_unique_id(user_input[CONF_AREA_NAME])
             self._abort_if_unique_id_configured()
 
             # Ensure icon has a default value if not provided
@@ -52,7 +52,7 @@ class RoomsConfigFlow(
                 user_input[CONF_ICON] = DEFAULT_ICON
 
             return self.async_create_entry(
-                title=user_input[CONF_ROOM_NAME],
+                title=user_input[CONF_AREA_NAME],
                 data=user_input,
             )  # pyright: ignore[reportReturnType]
 
@@ -60,7 +60,7 @@ class RoomsConfigFlow(
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_ROOM_NAME): str,
+                    vol.Required(CONF_AREA_NAME): str,
                     vol.Optional(CONF_ICON): selector.IconSelector(
                         selector.IconSelectorConfig(placeholder="mdi:texture-box")
                     ),

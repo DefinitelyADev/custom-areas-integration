@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test runner for the Rooms integration."""
+"""Test runner for the Custom Areas Integration."""
 
 import subprocess
 import sys
@@ -7,7 +7,7 @@ import sys
 
 def run_tests():
     """Run the test suite."""
-    print("🧪 Running tests for Rooms integration...")
+    print("🧪 Running tests for Custom Areas Integration...")
 
     # Check if pytest is available
     try:
@@ -22,7 +22,7 @@ def run_tests():
             sys.executable,
             "-m",
             "pytest",
-            "custom_components/rooms/tests/",
+            "custom_components/areas/tests/",
             "-v",
             "--tb=short",
         ],

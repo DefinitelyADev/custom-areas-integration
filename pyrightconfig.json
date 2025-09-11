@@ -18,7 +18,7 @@
     "reportDuplicateImport": "warning",
     "pythonVersion": "3.11",
     "include": [
-        "custom_components/rooms"
+        "custom_components/areas"
     ],
     "exclude": [
         "**/__pycache__",

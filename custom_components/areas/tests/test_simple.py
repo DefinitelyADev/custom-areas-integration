@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from homeassistant.core import HomeAssistant
 
-from custom_components.rooms.config_flow import RoomsConfigFlow
+from custom_components.areas.config_flow import AreasConfigFlow
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def mock_hass():
 
 @pytest.mark.asyncio
 async def test_async(mock_hass):
-    flow = RoomsConfigFlow()
+    flow = AreasConfigFlow()
     flow.hass = mock_hass
     flow.context = {}
     assert True

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple validation script for the Rooms integration."""
+"""Simple validation script for the Custom Areas Integration."""
 
 import json
 import sys
@@ -8,7 +8,7 @@ from pathlib import Path
 
 def validate_manifest():
     """Validate manifest.json."""
-    manifest_path = Path("custom_components/rooms/manifest.json")
+    manifest_path = Path("custom_components/areas/manifest.json")
     if not manifest_path.exists():
         print("❌ manifest.json not found")
         return False
@@ -29,8 +29,8 @@ def validate_manifest():
                 print(f"❌ Missing required field in manifest: {field}")
                 return False
 
-        if manifest["domain"] != "rooms":
-            print("❌ Domain should be 'rooms'")
+        if manifest["domain"] != "areas":
+            print("❌ Domain should be 'areas'")
             return False
 
         print("✅ manifest.json is valid")
@@ -42,8 +42,8 @@ def validate_manifest():
 
 def validate_translations():
     """Validate translation files."""
-    strings_path = Path("custom_components/rooms/strings.json")
-    en_path = Path("custom_components/rooms/translations/en.json")
+    strings_path = Path("custom_components/areas/strings.json")
+    en_path = Path("custom_components/areas/translations/en.json")
 
     if not strings_path.exists():
         print("❌ strings.json not found")
@@ -84,13 +84,13 @@ def validate_translations():
 def validate_structure():
     """Validate basic file structure."""
     required_files = [
-        "custom_components/rooms/__init__.py",
-        "custom_components/rooms/config_flow.py",
-        "custom_components/rooms/sensor.py",
-        "custom_components/rooms/const.py",
-        "custom_components/rooms/manifest.json",
-        "custom_components/rooms/strings.json",
-        "custom_components/rooms/translations/en.json",
+        "custom_components/areas/__init__.py",
+        "custom_components/areas/config_flow.py",
+        "custom_components/areas/sensor.py",
+        "custom_components/areas/const.py",
+        "custom_components/areas/manifest.json",
+        "custom_components/areas/strings.json",
+        "custom_components/areas/translations/en.json",
     ]
 
     missing_files = []
@@ -110,7 +110,7 @@ def validate_structure():
 
 def main():
     """Run all validations."""
-    print("🔍 Validating Rooms integration...")
+    print("🔍 Validating Custom Areas Integration...")
 
     all_valid = True
     all_valid &= validate_structure()
