@@ -18,7 +18,7 @@
     "reportDuplicateImport": "warning",
     "pythonVersion": "3.11",
     "include": [
-        "custom_components/areas"
+        "custom_components/custom_areas"
     ],
     "exclude": [
         "**/__pycache__",

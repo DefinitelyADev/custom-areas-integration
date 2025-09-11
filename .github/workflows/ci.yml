@@ -132,8 +132,8 @@ jobs:
 
     - name: Run linting
       run: |
-        black --check --diff custom_components/areas/
-        isort --check-only --diff custom_components/areas/
-        flake8 custom_components/areas/
-        ruff check custom_components/areas/
-        cd custom_components && python -m mypy areas/
+        black --check --diff custom_components/custom_areas/
+        isort --check-only --diff custom_components/custom_areas/
+        flake8 custom_components/custom_areas/
+        ruff check custom_components/custom_areas/
+        cd custom_components && python -m mypy custom_areas/

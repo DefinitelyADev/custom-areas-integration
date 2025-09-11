@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant
 
-from custom_components.areas.const import (
+from custom_components.custom_areas.const import (
     CONF_ACTIVE_THRESHOLD,
     CONF_AREA_NAME,
     CONF_ENERGY_ENTITY,
@@ -20,7 +20,7 @@ from custom_components.areas.const import (
     STATE_IDLE,
     STATE_UNKNOWN,
 )
-from custom_components.areas.sensor import AreaSensorCoordinator, AreaSummarySensor
+from custom_components.custom_areas.sensor import AreaSensorCoordinator, AreaSummarySensor
 
 
 @pytest.fixture
@@ -224,7 +224,7 @@ def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
 
 def test_unit_constant_fallbacks(monkeypatch):
     """Test unit constant import fallbacks work correctly."""
-    from custom_components.areas import sensor
+    from custom_components.custom_areas import sensor
 
     # Mock sys.modules to simulate missing modules
     original_modules = dict(sys.modules)
@@ -257,7 +257,7 @@ def test_unit_constant_fallbacks(monkeypatch):
 
 def test_unit_constants_with_deprecated_fallback(monkeypatch):
     """Test that deprecated constants are used when new ones fail."""
-    from custom_components.areas import sensor
+    from custom_components.custom_areas import sensor
 
     # Mock only the new unit system modules as missing
     original_modules = dict(sys.modules)

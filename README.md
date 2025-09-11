@@ -1,4 +1,4 @@
-![Custom Areas Integration](/docs/images/logo.svg "Custom Areas Integration Logo")
+![Custom Areas Integration](/docs/images/logo.png "Custom Areas Integration Logo")
 
 # Custom Areas Integration
 
@@ -50,7 +50,7 @@ Not affiliated with Home Assistant — just vibing on top of it.
 
 ### Manual Installation
 
-1. Download the `custom_components/areas/` folder from this repository
+1. Download the `custom_components/custom_areas/` folder from this repository
 2. Copy it to your Home Assistant's `custom_components/` directory
 3. Restart Home Assistant
 
@@ -139,7 +139,7 @@ Add this to your `configuration.yaml` to enable debug logging:
 logger:
   default: info
   logs:
-    custom_components.areas: debug
+    custom_components.custom_areas: debug
 ```
 
 ## Contributing
@@ -184,9 +184,9 @@ Or run individual checks:
 python validate.py          # Custom validation
 python run_tests.py         # Unit tests
 pyright                    # Type checking
-black --check custom_components/areas/    # Code formatting
-isort --check-only custom_components/areas/  # Import sorting
-flake8 custom_components/areas/           # Linting
+black --check custom_components/custom_areas/    # Code formatting
+isort --check-only custom_components/custom_areas/  # Import sorting
+flake8 custom_components/custom_areas/           # Linting
 ```
 
 ### Pre-commit Setup

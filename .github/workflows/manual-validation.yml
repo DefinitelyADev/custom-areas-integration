@@ -75,9 +75,9 @@ jobs:
 
     - name: Run linting
       run: |
-        black --check --diff custom_components/areas/
-        isort --check-only --diff custom_components/areas/
-        flake8 custom_components/areas/
+        black --check --diff custom_components/custom_areas/
+        isort --check-only --diff custom_components/custom_areas/
+        flake8 custom_components/custom_areas/
 
   manual-type-check:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'type-check'

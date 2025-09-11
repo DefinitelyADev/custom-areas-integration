@@ -8,7 +8,7 @@ from pathlib import Path
 
 def validate_manifest():
     """Validate manifest.json."""
-    manifest_path = Path("custom_components/areas/manifest.json")
+    manifest_path = Path("custom_components/custom_areas/manifest.json")
     if not manifest_path.exists():
         print("❌ manifest.json not found")
         return False
@@ -29,8 +29,8 @@ def validate_manifest():
                 print(f"❌ Missing required field in manifest: {field}")
                 return False
 
-        if manifest["domain"] != "areas":
-            print("❌ Domain should be 'areas'")
+        if manifest["domain"] != "custom_areas":
+            print("❌ Domain should be 'custom_areas'")
             return False
 
         print("✅ manifest.json is valid")
@@ -42,8 +42,8 @@ def validate_manifest():
 
 def validate_translations():
     """Validate translation files."""
-    strings_path = Path("custom_components/areas/strings.json")
-    en_path = Path("custom_components/areas/translations/en.json")
+    strings_path = Path("custom_components/custom_areas/strings.json")
+    en_path = Path("custom_components/custom_areas/translations/en.json")
 
     if not strings_path.exists():
         print("❌ strings.json not found")
@@ -84,13 +84,13 @@ def validate_translations():
 def validate_structure():
     """Validate basic file structure."""
     required_files = [
-        "custom_components/areas/__init__.py",
-        "custom_components/areas/config_flow.py",
-        "custom_components/areas/sensor.py",
-        "custom_components/areas/const.py",
-        "custom_components/areas/manifest.json",
-        "custom_components/areas/strings.json",
-        "custom_components/areas/translations/en.json",
+        "custom_components/custom_areas/__init__.py",
+        "custom_components/custom_areas/config_flow.py",
+        "custom_components/custom_areas/sensor.py",
+        "custom_components/custom_areas/const.py",
+        "custom_components/custom_areas/manifest.json",
+        "custom_components/custom_areas/strings.json",
+        "custom_components/custom_areas/translations/en.json",
     ]
 
     missing_files = []
