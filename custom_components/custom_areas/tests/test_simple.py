@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from homeassistant.core import HomeAssistant
 
-from custom_components.areas.config_flow import AreasConfigFlow
+from custom_components.custom_areas.config_flow import AreasConfigFlow
 
 
 @pytest.fixture

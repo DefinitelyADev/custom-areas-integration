@@ -22,7 +22,7 @@ def run_tests():
             sys.executable,
             "-m",
             "pytest",
-            "custom_components/areas/tests/",
+            "custom_components/custom_areas/tests/",
             "-v",
             "--tb=short",
         ],

@@ -7,7 +7,7 @@ The Custom Areas Integration follows Home Assistant's standard custom integratio
 ### Core Files
 
 ```
-custom_components/areas/
+custom_components/custom_areas/
 ├── __init__.py          # Integration setup and lifecycle
 ├── config_flow.py       # UI configuration flow
 ├── sensor.py           # Sensor entity implementation
@@ -96,7 +96,7 @@ The project includes comprehensive tests covering:
 
 Run tests with:
 ```bash
-python -m pytest custom_components/areas/tests/
+python -m pytest custom_components/custom_areas/tests/
 ```
 
 ### Code Quality
