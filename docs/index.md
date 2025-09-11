@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the Rooms integration documentation! This comprehensive documentation covers everything you need to know about installing, configuring, and extending the Rooms integration for Home Assistant.
+Welcome to the Custom Areas Integration documentation! This comprehensive documentation covers everything you need to know about installing, configuring, and extending the Custom Areas Integration for Home Assistant.
 
 ## 📖 Documentation Overview
 
@@ -32,7 +32,7 @@ Welcome to the Rooms integration documentation! This comprehensive documentation
 The integration consists of:
 - **Config Flow** - Handles UI configuration and validation
 - **Sensor Coordinator** - Manages state updates and event listeners
-- **Room Sensor** - Main entity providing room state and attributes
+- **Area Sensor** - Main entity providing room state and attributes
 - **Device Registry** - Creates proper device entries
 
 ## 🔧 Development
@@ -59,7 +59,7 @@ pyright                        # Type checking
 
 ## 📊 State Logic
 
-Room states are determined by priority:
+Area states are determined by priority:
 1. **Motion Detected** → `active`
 2. **Power > Threshold** → `active`
 3. **Entities Configured** → `idle`

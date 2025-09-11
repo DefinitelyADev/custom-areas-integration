@@ -1,11 +1,11 @@
-# Rooms Integration for Home Assistant
+# Custom Areas Integration for Home Assistant
 
-A custom integration for Home Assistant that creates composite "Room" sensors with UI configuration.
+A custom integration for Home Assistant that creates composite "Area" sensors with UI configuration.
 
 ## Features
 
-- **UI Configuration**: Add rooms through Home Assistant's UI with an intuitive config flow
-- **Composite Sensors**: Each room creates a summary sensor that combines multiple entity states
+- **UI Configuration**: Add areas through Home Assistant's UI with an intuitive config flow
+- **Composite Sensors**: Each area creates a summary sensor that combines multiple entity states
 - **Real-time Updates**: Uses event-driven updates instead of polling for instant state changes
 - **Device Registry**: Creates proper devices in Home Assistant's device registry
 
@@ -13,7 +13,7 @@ A custom integration for Home Assistant that creates composite "Room" sensors wi
 
 📖 **Complete Documentation**: [docs/](docs/)
 
-- **[Design Rationale](docs/rationale.md)** - Why this exists and how it pairs with CFHAC/Area-like UX
+- **[Design Rationale](docs/rationale.md)** - Why this exists and how it pairs with Custom Features for Home Assistant Cards/Area-like UX
 - **[API Reference](docs/api.md)** - Entity states, attributes, and configuration schema
 - **[Configuration Examples](docs/examples.md)** - Real-world setup examples and use cases
 - **[Developer Guide](docs/developer.md)** - Architecture overview and development setup
@@ -43,23 +43,23 @@ Not affiliated with Home Assistant — just vibing on top of it.
    - Select "Custom repositories"
    - Add: `https://github.com/DefinitelyADev/room-entity`
    - Category: Integration
-3. Search for "Rooms" in HACS and install it
+3. Search for "Areas" in HACS and install it
 4. Restart Home Assistant
 
 ### Manual Installation
 
-1. Download the `custom_components/rooms/` folder from this repository
+1. Download the `custom_components/areas/` folder from this repository
 2. Copy it to your Home Assistant's `custom_components/` directory
 3. Restart Home Assistant
 
 ## Configuration
 
-### Adding a Room
+### Adding an Area
 
 1. Go to **Settings** → **Devices & Services** → **Add Integration**
-2. Search for "Rooms" and select it
-3. Configure your room:
-   - **Room Name**: Display name for the room
+2. Search for "Areas" and select it
+3. Configure your area:
+   - **Area Name**: Display name for the area
    - **Power Sensor**: Optional sensor for power consumption
    - **Energy Sensor**: Optional sensor for energy consumption
    - **Temperature Sensor**: Optional temperature sensor
@@ -67,16 +67,16 @@ Not affiliated with Home Assistant — just vibing on top of it.
    - **Motion Sensor**: Optional motion detection sensor
    - **Window Sensor**: Optional window/door sensor
    - **Climate Entity**: Optional climate control entity
-   - **Active Power Threshold**: Power level (in watts) above which the room is considered "active"
+   - **Active Power Threshold**: Power level (in watts) above which the area is considered "active"
 
 ## Usage
 
 ### Summary Sensor
 
-Each room creates a summary sensor with these states:
-- **active**: Room is currently active (motion detected OR power above threshold)
-- **idle**: Room has configured entities but is not active
-- **unknown**: No entities configured for the room
+Each area creates a summary sensor with these states:
+- **active**: Area is currently active (motion detected OR power above threshold)
+- **idle**: Area has configured entities but is not active
+- **unknown**: No entities configured for the area
 
 The summary sensor includes these attributes:
 - `power_w` (numeric) and `power` (string with unit, e.g. "28.6 W")
@@ -88,15 +88,15 @@ The summary sensor includes these attributes:
 - `climate_mode`: Current climate mode
    - `climate_target_c` (numeric) and `climate_target` (string with unit)
 
-### Area vs Tile (with CFHAC)
+### Area vs Tile (with Custom Features for Home Assistant Cards)
 
-If you want to mimic the Area card using a Tile card with CFHAC features and the room summary sensor:
+If you want to mimic the Area card using a Tile card with Custom Features for Home Assistant Cards features and the area summary sensor:
 
-![Area card vs Tile card with CFHAC](docs/images/area-vs-tile.png)
+![Area card vs Tile card with Custom Features for Home Assistant Cards](docs/images/area-vs-tile.png)
 
 ## State Logic
 
-The room state is determined by this priority:
+The area state is determined by this priority:
 1. If motion sensor is ON → **active**
 2. If power consumption > active threshold → **active**
 3. If any core entities exist but conditions 1-2 are false → **idle**
@@ -104,15 +104,15 @@ The room state is determined by this priority:
 
 ## Icons
 
-The summary sensor icon changes based on room status:
+The summary sensor icon changes based on area status:
 - Window open: `mdi:window-open-variant`
 - Motion detected: `mdi:motion-sensor`
 - Default: `mdi:home`
 
 ## Device Registry
 
-Each room creates a device in Home Assistant's device registry, allowing you to:
-- Group all room sensors together
+Each area creates a device in Home Assistant's device registry, allowing you to:
+- Group all area sensors together
 - View device information
 - Manage device settings
 
@@ -120,7 +120,7 @@ Each room creates a device in Home Assistant's device registry, allowing you to:
 
 - Home Assistant 2024.1.0 or later
 - Python 3.10 or later
-- Entities must exist before configuring the room
+- Entities must exist before configuring the area
 
 ## Troubleshooting
 
@@ -137,7 +137,7 @@ Add this to your `configuration.yaml` to enable debug logging:
 logger:
   default: info
   logs:
-    custom_components.rooms: debug
+    custom_components.areas: debug
 ```
 
 ## Contributing
@@ -182,9 +182,9 @@ Or run individual checks:
 python validate.py          # Custom validation
 python run_tests.py         # Unit tests
 pyright                    # Type checking
-black --check custom_components/rooms/    # Code formatting
-isort --check-only custom_components/rooms/  # Import sorting
-flake8 custom_components/rooms/           # Linting
+black --check custom_components/areas/    # Code formatting
+isort --check-only custom_components/areas/  # Import sorting
+flake8 custom_components/areas/           # Linting
 ```
 
 ### Pre-commit Setup

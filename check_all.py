@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run all validations and checks for the Rooms integration."""
+"""Run all validations and checks for the Custom Areas Integration."""
 
 import subprocess
 import sys
@@ -23,12 +23,12 @@ def run_command(cmd, description):
 
 def main():
     """Run all validations."""
-    print("🚀 Running all validations for Rooms integration...")
+    print("🚀 Running all validations for Custom Areas Integration...")
 
     all_passed = True
 
     # Check if we're in the right directory
-    if not Path("custom_components/rooms").exists():
+    if not Path("custom_components/areas").exists():
         print("❌ Not in the correct directory. Please run from the project root.")
         return 1
 
@@ -45,13 +45,13 @@ def main():
         all_passed = False
 
     # Run linting
-    if not run_command("black --check --diff custom_components/rooms/", "Black formatting check"):
+    if not run_command("black --check --diff custom_components/areas/", "Black formatting check"):
         all_passed = False
 
-    if not run_command("isort --check-only --diff custom_components/rooms/", "Import sorting check"):
+    if not run_command("isort --check-only --diff custom_components/areas/", "Import sorting check"):
         all_passed = False
 
-    if not run_command("flake8 custom_components/rooms/", "Flake8 linting"):
+    if not run_command("flake8 custom_components/areas/", "Flake8 linting"):
         all_passed = False
 
     # Run pre-commit (if available)

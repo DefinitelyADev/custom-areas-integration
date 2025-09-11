@@ -2,10 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "title": "Add Room",
-        "description": "Configure a new room sensor",
+        "title": "Add Area",
+        "description": "Configure a new area sensor",
         "data": {
-          "room_name": "Room Name",
+          "area_name": "Area Name",
           "power_entity": "Power Sensor (optional)",
           "energy_entity": "Energy Sensor (optional)",
           "temp_entity": "Temperature Sensor (optional)",
@@ -23,16 +23,16 @@
       "invalid_entity": "Invalid entity ID"
     },
     "abort": {
-      "already_configured": "Room already configured"
+      "already_configured": "Area already configured"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Room Options",
-        "description": "Configure room settings",
+        "title": "Area Options",
+        "description": "Configure area settings",
         "data": {
-          "room_name": "Room Name",
+          "area_name": "Area Name",
           "power_entity": "Power Sensor (optional)",
           "energy_entity": "Energy Sensor (optional)",
           "temp_entity": "Temperature Sensor (optional)",

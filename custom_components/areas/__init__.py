@@ -1,4 +1,4 @@
-"""Rooms integration for Home Assistant."""
+"""Custom Areas Integration for Home Assistant."""
 
 import logging
 
@@ -8,7 +8,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN
-from .sensor import RoomSensorCoordinator
+from .sensor import AreaSensorCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,11 +16,11 @@ PLATFORMS = ["sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up rooms from a config entry."""
-    _LOGGER.info("Setting up rooms integration for %s", entry.title)
+    """Set up areas from a config entry."""
+    _LOGGER.info("Setting up areas integration for %s", entry.title)
 
     try:
-        coordinator = RoomSensorCoordinator(hass, entry)
+        coordinator = AreaSensorCoordinator(hass, entry)
         await coordinator.async_config_entry_first_refresh()
 
         hass.data.setdefault(DOMAIN, {})
@@ -31,9 +31,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
             identifiers={(DOMAIN, entry.entry_id)},
-            name=f"Room: {entry.data.get('room_name', 'Unknown')}",
-            manufacturer="Rooms Integration",
-            model="Room Sensor",
+            name=f"Area: {entry.data.get('area_name', 'Unknown')}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
         )
 
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -43,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     except Exception as ex:
-        _LOGGER.error("Error setting up rooms integration: %s", ex)
+        _LOGGER.error("Error setting up areas integration: %s", ex)
         _LOGGER.error("Exception type: %s", type(ex).__name__)
         import traceback
 
@@ -53,7 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.info("Unloading rooms integration for %s", entry.title)
+    _LOGGER.info("Unloading areas integration for %s", entry.title)
 
     unload_ok: bool = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 

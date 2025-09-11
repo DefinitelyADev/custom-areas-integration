@@ -1,15 +1,14 @@
 # Design rationale
-
-This custom integration was created to deliver a room-level entity that works hand‑in‑hand with the [Custom Features for Home Assistant Cards (CFHAC)](https://github.com/Nerwyn/custom-card-features) extension, allowing dashboards to mirror the Area card’s high‑level UX while remaining portable and source‑of‑truth agnostic.
+This custom integration was created to deliver a room-level entity that works hand‑in‑hand with the [Custom Features for Home Assistant Cards](https://github.com/Nerwyn/custom-card-features) extension, allowing dashboards to mirror the Area card’s high‑level UX while remaining portable and source‑of‑truth agnostic, you are in control of areas' behavior. In addition, combining this integration with Custom Features for Home Assistant Cards unlocks more flexible card behaviors without being restricted to the Area logic and features. For example Area cards do not support showing a badge when a window is open, or when the AC is on, or changing the icon color based on temperature or humidity ranges. This integration exposes a stable schema that works well with Custom Features for Home Assistant Cards to implement these behaviors declaratively.
 
 Why not just use Areas? Two reasons:
 
 - Area entities aren’t first‑class, queryable sensors. They’re a grouping concept. Many dashboards still need a single, reactive entity per room that can provide a summary state and attributes for power, climate, occupancy, etc.
-- The Area card’s behavior is great for overview dashboards, but it’s not easily reproducible across themes or custom dashboards without writing glue logic. This integration exposes a predictable sensor that pairs nicely with CFHAC’s rules and feature toggles.
+- The Area card’s behavior is great for overview dashboards, but it’s not easily reproducible across themes or custom dashboards without writing glue logic. This integration exposes a predictable sensor that pairs nicely with Custom Features for Home Assistant Cards’s rules and feature toggles.
 
-The integration makes it straightforward to reproduce Area card behavior on a Tile card using CFHAC.
+The integration makes it straightforward to reproduce Area card behavior on a Tile card using Custom Features for Home Assistant Cards.
 
-![Area card vs Tile card with CFHAC](images/area-vs-tile.png)
+![Area card vs Tile card with Custom Features for Home Assistant Cards](images/area-vs-tile.png)
 
 ## Goals
 
@@ -32,7 +31,7 @@ The integration makes it straightforward to reproduce Area card behavior on a Ti
   - Human‑readable attributes with units for dashboards (e.g., `power`, `energy`, `temperature`, `humidity`, `climate_target`).
 - A lightweight coordinator listens to state changes of the referenced entities and schedules updates for the summary sensor—no polling.
 
-## Why this pairs well with CFHAC
+## Why this pairs well with Custom Features for Home Assistant Cards
 
 Custom Features for Home Assistant Cards lets you declaratively toggle and compose per‑card features based on entity attributes, thresholds, and state. By centralizing room summary data in a single entity:
 
@@ -71,9 +70,9 @@ Optional settings:
   - Optional aggregation of multiple motion or power entities
   - Presence from BLE/Wi‑Fi trackers
 - Add services to override state manually (e.g., force idle/active for a scene).
-- More attributes for CFHAC features (e.g., comfort score, air quality if present).
+- More attributes for Custom Features for Home Assistant Cards features (e.g., comfort score, air quality if present).
 
-## Example CFHAC usage
+## Example Custom Features for Home Assistant Cards usage
 
 - Show a glowing border when `state == "active"`.
 - Display a badge when `window_open` is true.
