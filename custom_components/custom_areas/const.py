@@ -1,6 +1,6 @@
 """Constants for the Custom Areas Integration."""
 
-DOMAIN = "areas"
+DOMAIN = "custom_areas"
 CONF_AREA_NAME = "area_name"
 CONF_POWER_ENTITY = "power_entity"
 CONF_ENERGY_ENTITY = "energy_entity"
