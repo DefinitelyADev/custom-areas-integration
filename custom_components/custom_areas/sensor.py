@@ -371,7 +371,7 @@ class AreaMeasurementSensor(SensorEntity):
 
     @property
     def native_value(self) -> Optional[float]:
-        """Return the state of the sensor."""
+        """Return the native value of the sensor."""
         entity_id = self.config_entry.data.get(self.entity_config_key)
         if not entity_id:
             return None
