@@ -156,11 +156,12 @@ class AreaSensorCoordinator:
     @callback
     def _handle_state_change(self, event: Event) -> None:
         """Handle state change events."""
+        # Extract data from event
+        event_data = event.data
+        entity_id = event_data.get("entity_id")
+
         # Update summary sensor
         if self._summary_sensor:
-            # Extract data from event
-            event_data = event.data
-            entity_id = event_data.get("entity_id")
             old_state = event_data.get("old_state")
             new_state = event_data.get("new_state")
 
@@ -169,10 +170,11 @@ class AreaSensorCoordinator:
             self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
 
         # Update relevant measurement sensors (only those affected by the changed entity)
-        for sensor in self._measurement_sensors:
-            sensor_entity_id = sensor.config_entry.data.get(sensor.entity_config_key)
-            if sensor_entity_id == entity_id:
-                sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
+        if entity_id:
+            for sensor in self._measurement_sensors:
+                sensor_entity_id = sensor.config_entry.data.get(sensor.entity_config_key)
+                if sensor_entity_id == entity_id:
+                    sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
     def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
