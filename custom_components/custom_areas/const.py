@@ -20,7 +20,6 @@ DEFAULT_ICON = "mdi:texture-box"
 STATE_ACTIVE = "active"
 STATE_IDLE = "idle"
 STATE_UNKNOWN = "unknown"
-STATE_UNAVAILABLE = "unavailable"
 
 # Icons
 ICON_HOME = "mdi:home"
