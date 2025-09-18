@@ -5,13 +5,15 @@ from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_OFF, STATE_ON
+from homeassistant.const import PERCENTAGE, STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant
 
 from custom_components.custom_areas.const import (
     CONF_ACTIVE_THRESHOLD,
     CONF_AREA_NAME,
+    CONF_CLIMATE_ENTITY,
     CONF_ENERGY_ENTITY,
+    CONF_HUMIDITY_ENTITY,
     CONF_MOTION_ENTITY,
     CONF_POWER_ENTITY,
     CONF_TEMP_ENTITY,
@@ -33,8 +35,10 @@ def mock_config_entry():
         CONF_POWER_ENTITY: "sensor.power",
         CONF_ENERGY_ENTITY: "sensor.energy",
         CONF_TEMP_ENTITY: "sensor.temperature",
+        CONF_HUMIDITY_ENTITY: "sensor.humidity",
         CONF_MOTION_ENTITY: "binary_sensor.motion",
         CONF_WINDOW_ENTITY: "binary_sensor.window",
+        CONF_CLIMATE_ENTITY: "climate.thermostat",
         CONF_ACTIVE_THRESHOLD: 50.0,
     }
     return entry
@@ -152,42 +156,44 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     sensor.hass = mock_hass
 
     # Mock states
-    power_state = MagicMock()
-    power_state.state = "25.5"
-
-    energy_state = MagicMock()
-    energy_state.state = "150.0"
-
-    temp_state = MagicMock()
-    temp_state.state = "22.3"
-
     motion_state = MagicMock()
     motion_state.state = STATE_ON
 
+    window_state = MagicMock()
+    window_state.state = STATE_OFF
+
+    climate_state = MagicMock()
+    climate_state.state = "heat"
+
     def mock_get(entity_id):
-        if entity_id == "sensor.power":
-            return power_state
-        elif entity_id == "sensor.energy":
-            return energy_state
-        elif entity_id == "sensor.temperature":
-            return temp_state
-        elif entity_id == "binary_sensor.motion":
+        if entity_id == "binary_sensor.motion":
             return motion_state
+        elif entity_id == "binary_sensor.window":
+            return window_state
+        elif entity_id == "climate.thermostat":
+            return climate_state
         return None
 
     mock_hass.states.get = mock_get
 
     attrs = sensor.extra_state_attributes
 
-    assert attrs["power_w"] == 25.5
-    assert attrs["energy_wh"] == 150.0
-    assert attrs["temperature_c"] == 22.3
+    # Only binary sensor attributes should be present now
     assert attrs["occupied"] is True
+    assert attrs["window_open"] is False
+    assert attrs["climate_mode"] == "heat"
 
-    # Display attributes should include units in their strings
-    assert attrs["power"].endswith(" W")
-    assert attrs["energy"].endswith(" Wh")
-    assert attrs["temperature"].endswith(" °C")
+    # Numeric measurement attributes should no longer be present
+    assert "power_w" not in attrs
+    assert "energy_wh" not in attrs
+    assert "temperature_c" not in attrs
+    assert "humidity_pct" not in attrs
+
+    # Display attributes should no longer be present
+    assert "power" not in attrs
+    assert "energy" not in attrs
+    assert "temperature" not in attrs
+    assert "humidity" not in attrs
 
 
 def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
@@ -294,40 +300,154 @@ def test_unit_constants_with_deprecated_fallback(monkeypatch):
 
 
 def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
-    """Test that sensor works correctly even with fallback unit constants."""
+    """Test that summary sensor works correctly with simplified attributes."""
     sensor_instance = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor_instance.hass = mock_hass
 
-    # Mock states
+    # Mock states - only binary sensors for summary sensor
+    motion_state = MagicMock()
+    motion_state.state = STATE_ON
+
+    def mock_get(entity_id):
+        if entity_id == "binary_sensor.motion":
+            return motion_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    # Test that only appropriate attributes are generated for summary sensor
+    attrs = sensor_instance.extra_state_attributes
+
+    # Only binary sensor attributes should be present
+    assert attrs["occupied"] is True
+
+    # Numeric measurement attributes should no longer be in summary sensor
+    assert "power_w" not in attrs
+    assert "energy_wh" not in attrs
+    assert "temperature_c" not in attrs
+
+    # Display attributes should no longer be in summary sensor
+    assert "power" not in attrs
+    assert "energy" not in attrs
+    assert "temperature" not in attrs
+
+
+def test_area_power_sensor(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area power sensor."""
+    from custom_components.custom_areas.sensor import AreaPowerSensor, UNIT_WATT
+
+    sensor = AreaPowerSensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    # Mock power state
     power_state = MagicMock()
-    power_state.state = "100.0"
-
-    energy_state = MagicMock()
-    energy_state.state = "500.0"
-
-    temp_state = MagicMock()
-    temp_state.state = "25.5"
+    power_state.state = "25.5"
 
     def mock_get(entity_id):
         if entity_id == "sensor.power":
             return power_state
-        elif entity_id == "sensor.energy":
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.state == 25.5
+    assert sensor.native_unit_of_measurement == UNIT_WATT
+    assert sensor.available is True
+    assert "Power" in sensor.name
+
+
+def test_area_energy_sensor(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area energy sensor."""
+    from custom_components.custom_areas.sensor import AreaEnergySensor, UNIT_WATT_HOUR
+
+    sensor = AreaEnergySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    # Mock energy state
+    energy_state = MagicMock()
+    energy_state.state = "150.0"
+
+    def mock_get(entity_id):
+        if entity_id == "sensor.energy":
             return energy_state
-        elif entity_id == "sensor.temperature":
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.state == 150.0
+    assert sensor.native_unit_of_measurement == UNIT_WATT_HOUR
+    assert sensor.available is True
+    assert "Energy" in sensor.name
+
+
+def test_area_temperature_sensor(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area temperature sensor."""
+    from custom_components.custom_areas.sensor import AreaTemperatureSensor, UNIT_CELSIUS
+
+    sensor = AreaTemperatureSensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    # Mock temperature state
+    temp_state = MagicMock()
+    temp_state.state = "22.3"
+
+    def mock_get(entity_id):
+        if entity_id == "sensor.temperature":
             return temp_state
         return None
 
     mock_hass.states.get = mock_get
 
-    # Test that attributes are generated correctly regardless of which
-    # unit constants are used
-    attrs = sensor_instance.extra_state_attributes
+    assert sensor.state == 22.3
+    assert sensor.native_unit_of_measurement == UNIT_CELSIUS
+    assert sensor.available is True
+    assert "Temperature" in sensor.name
 
-    assert attrs["power_w"] == 100.0
-    assert attrs["energy_wh"] == 500.0
-    assert attrs["temperature_c"] == 25.5
 
-    # Display attributes should exist and contain units
-    assert isinstance(attrs.get("power"), str) and attrs["power"].endswith(" W")
-    assert isinstance(attrs.get("energy"), str) and attrs["energy"].endswith(" Wh")
-    assert isinstance(attrs.get("temperature"), str) and attrs["temperature"].endswith(" °C")
+def test_area_humidity_sensor(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area humidity sensor."""
+    from custom_components.custom_areas.sensor import AreaHumiditySensor
+
+    sensor = AreaHumiditySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    # Mock humidity state
+    humidity_state = MagicMock()
+    humidity_state.state = "65.0"
+
+    def mock_get(entity_id):
+        if entity_id == "sensor.humidity":
+            return humidity_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.state == 65.0
+    assert sensor.native_unit_of_measurement == PERCENTAGE
+    assert sensor.available is True
+    assert "Humidity" in sensor.name
+
+
+def test_area_climate_target_sensor(mock_coordinator, mock_config_entry, mock_hass):
+    """Test area climate target sensor."""
+    from custom_components.custom_areas.sensor import AreaClimateTargetSensor, UNIT_CELSIUS
+
+    sensor = AreaClimateTargetSensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    # Mock climate state with temperature attribute
+    climate_state = MagicMock()
+    climate_state.state = "heat"
+    climate_state.attributes = {"temperature": 21.0}
+
+    def mock_get(entity_id):
+        if entity_id == "climate.thermostat":
+            return climate_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.state == 21.0
+    assert sensor.native_unit_of_measurement == UNIT_CELSIUS
+    assert sensor.available is True
+    assert "Climate Target" in sensor.name
