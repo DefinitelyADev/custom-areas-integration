@@ -5,6 +5,17 @@ All notable changes to the Rooms integration will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## ## [1.2.0] - TBD
+
+### Added
+- Individual measurement sensors: `AreaPowerSensor`, `AreaEnergySensor`, `AreaTemperatureSensor`, `AreaHumiditySensor`, `AreaClimateTargetSensor`
+- Proper `native_unit_of_measurement` for each measurement sensor following Home Assistant standards
+- Better separation of concerns: summary sensor for state, individual sensors for measurements
+
+### Fixed
+- Allows users to control precision and formatting through Home Assistant's built-in sensor features
+- Follows Home Assistant sensor design principles
+
 ## [1.0.0] - 2025-09-09
 
 ### Added
