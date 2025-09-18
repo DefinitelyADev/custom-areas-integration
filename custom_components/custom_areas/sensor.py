@@ -185,6 +185,11 @@ class AreaSensorCoordinator:
         """Register a measurement sensor."""
         self._measurement_sensors.append(sensor)
 
+    def unregister_measurement_sensor(self, sensor: "AreaMeasurementSensor") -> None:
+        """Unregister a measurement sensor."""
+        if sensor in self._measurement_sensors:
+            self._measurement_sensors.remove(sensor)
+
     def async_shutdown(self):
         """Clean up listeners."""
         for listener in self._listeners:
@@ -387,6 +392,10 @@ class AreaMeasurementSensor(SensorEntity):
         if state is None:
             return False
         return state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE)
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister from coordinator when entity is removed."""
+        self.coordinator.unregister_measurement_sensor(self)
 
 
 class AreaPowerSensor(AreaMeasurementSensor):
