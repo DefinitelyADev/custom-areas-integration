@@ -3,9 +3,9 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, STATE_ON
+from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -22,7 +22,9 @@ try:
 except ImportError:
     # Fallback for older versions or if unit system constants don't exist
     try:
-        from homeassistant.const import ENERGY_WATT_HOUR, POWER_WATT, TEMP_CELSIUS
+        from homeassistant.const import ENERGY_WATT_HOUR  # pyright: ignore[reportAttributeAccessIssue]
+        from homeassistant.const import POWER_WATT  # pyright: ignore[reportAttributeAccessIssue]
+        from homeassistant.const import TEMP_CELSIUS  # pyright: ignore[reportAttributeAccessIssue]
 
         UNIT_CELSIUS = TEMP_CELSIUS
         UNIT_WATT = POWER_WATT
@@ -50,8 +52,6 @@ from .const import (
     ICON_MOTION,
     ICON_WINDOW_OPEN,
     STATE_ACTIVE,
-    STATE_IDLE,
-    STATE_UNKNOWN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -168,9 +168,11 @@ class AreaSensorCoordinator:
 
             self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
 
-        # Update relevant measurement sensors
+        # Update relevant measurement sensors (only those affected by the changed entity)
         for sensor in self._measurement_sensors:
-            sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
+            sensor_entity_id = sensor.config_entry.data.get(sensor.entity_config_key)
+            if sensor_entity_id == entity_id:
+                sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
     def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
@@ -262,9 +264,9 @@ class AreaSummarySensor(SensorEntity):
         ]
 
         if any(entity for entity in core_entities if entity):
-            return STATE_IDLE
+            return str(STATE_IDLE)
 
-        return STATE_UNKNOWN
+        return str(STATE_UNKNOWN)
 
     @property
     def icon(self) -> str:
@@ -286,7 +288,8 @@ class AreaSummarySensor(SensorEntity):
                 return ICON_MOTION
 
         # Return configured icon or default
-        return str(data.get(CONF_ICON, DEFAULT_ICON))
+        icon_value = data.get(CONF_ICON, DEFAULT_ICON)
+        return str(icon_value) if icon_value is not None else DEFAULT_ICON
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
@@ -387,7 +390,10 @@ class AreaMeasurementSensor(SensorEntity):
         entity_id = self.config_entry.data.get(self.entity_config_key)
         if not entity_id:
             return False
-        return self.hass.states.get(entity_id) is not None
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return False
+        return state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE)
 
 
 class AreaPowerSensor(AreaMeasurementSensor):
@@ -396,7 +402,7 @@ class AreaPowerSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the power sensor."""
         super().__init__(coordinator, config_entry, "Power", CONF_POWER_ENTITY, UNIT_WATT)
-        self._attr_device_class = "power"
+        self._attr_device_class = SensorDeviceClass.POWER
         self._attr_state_class = "measurement"
 
 
@@ -406,7 +412,7 @@ class AreaEnergySensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the energy sensor."""
         super().__init__(coordinator, config_entry, "Energy", CONF_ENERGY_ENTITY, UNIT_WATT_HOUR)
-        self._attr_device_class = "energy"
+        self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = "total_increasing"
 
 
@@ -416,7 +422,7 @@ class AreaTemperatureSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the temperature sensor."""
         super().__init__(coordinator, config_entry, "Temperature", CONF_TEMP_ENTITY, UNIT_CELSIUS)
-        self._attr_device_class = "temperature"
+        self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = "measurement"
 
 
@@ -426,7 +432,7 @@ class AreaHumiditySensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the humidity sensor."""
         super().__init__(coordinator, config_entry, "Humidity", CONF_HUMIDITY_ENTITY, PERCENTAGE)
-        self._attr_device_class = "humidity"
+        self._attr_device_class = SensorDeviceClass.HUMIDITY
         self._attr_state_class = "measurement"
 
 
@@ -436,7 +442,7 @@ class AreaClimateTargetSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the climate target temperature sensor."""
         super().__init__(coordinator, config_entry, "Climate Target", CONF_CLIMATE_ENTITY, UNIT_CELSIUS)
-        self._attr_device_class = "temperature"
+        self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = "measurement"
 
     @property
