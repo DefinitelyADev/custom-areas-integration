@@ -57,6 +57,29 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
+def get_numeric_state(hass: HomeAssistant, entity_id: str) -> Optional[float]:
+    """Get numeric state from entity.
+
+    Returns the parsed float value, or None if the entity doesn't exist
+    or the state cannot be converted to a float.
+    """
+    if not entity_id:
+        return None
+
+    state = hass.states.get(entity_id)
+    if state:
+        try:
+            return float(state.state)
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug(
+                "Failed to convert state %s for entity %s: %s",
+                state.state,
+                entity_id,
+                err,
+            )
+    return None
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -202,26 +225,6 @@ class AreaSummarySensor(SensorEntity):
         area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}" if area_name else None
 
-    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
-        """Get numeric state from entity, with fallback to default."""
-        if not entity_id:
-            return None
-
-        state = self.hass.states.get(entity_id)
-        if state:
-            try:
-                value = float(state.state)
-                return value if value != 0.0 else default_value
-            except (ValueError, TypeError) as err:
-                _LOGGER.debug(
-                    "Failed to convert state %s for entity %s: %s",
-                    state.state,
-                    entity_id,
-                    err,
-                )
-                pass
-        return None
-
     @property
     def state(self) -> str:
         """Return the state of the sensor."""
@@ -361,33 +364,13 @@ class AreaMeasurementSensor(SensorEntity):
         measurement_type = self.measurement_type.lower().replace(" ", "_")
         return f"custom_area_{area_name}_{measurement_type}" if area_name else None
 
-    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
-        """Get numeric state from entity, with fallback to default."""
-        if not entity_id:
-            return None
-
-        state = self.hass.states.get(entity_id)
-        if state:
-            try:
-                value = float(state.state)
-                return value if value != 0.0 else default_value
-            except (ValueError, TypeError) as err:
-                _LOGGER.debug(
-                    "Failed to convert state %s for entity %s: %s",
-                    state.state,
-                    entity_id,
-                    err,
-                )
-                pass
-        return None
-
     @property
     def state(self) -> Optional[float]:
         """Return the state of the sensor."""
         entity_id = self.config_entry.data.get(self.entity_config_key)
         if not entity_id:
             return None
-        return self._get_numeric_state(entity_id)
+        return get_numeric_state(self.hass, entity_id)
 
     @property
     def available(self) -> bool:
