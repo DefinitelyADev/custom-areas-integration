@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import Event, HomeAssistant, callback
@@ -403,7 +403,7 @@ class AreaPowerSensor(AreaMeasurementSensor):
         """Initialize the power sensor."""
         super().__init__(coordinator, config_entry, "Power", CONF_POWER_ENTITY, UNIT_WATT)
         self._attr_device_class = SensorDeviceClass.POWER
-        self._attr_state_class = "measurement"
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
 
 class AreaEnergySensor(AreaMeasurementSensor):
@@ -413,7 +413,7 @@ class AreaEnergySensor(AreaMeasurementSensor):
         """Initialize the energy sensor."""
         super().__init__(coordinator, config_entry, "Energy", CONF_ENERGY_ENTITY, UNIT_WATT_HOUR)
         self._attr_device_class = SensorDeviceClass.ENERGY
-        self._attr_state_class = "total_increasing"
+        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
 
 
 class AreaTemperatureSensor(AreaMeasurementSensor):
@@ -423,7 +423,7 @@ class AreaTemperatureSensor(AreaMeasurementSensor):
         """Initialize the temperature sensor."""
         super().__init__(coordinator, config_entry, "Temperature", CONF_TEMP_ENTITY, UNIT_CELSIUS)
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = "measurement"
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
 
 class AreaHumiditySensor(AreaMeasurementSensor):
@@ -433,7 +433,7 @@ class AreaHumiditySensor(AreaMeasurementSensor):
         """Initialize the humidity sensor."""
         super().__init__(coordinator, config_entry, "Humidity", CONF_HUMIDITY_ENTITY, PERCENTAGE)
         self._attr_device_class = SensorDeviceClass.HUMIDITY
-        self._attr_state_class = "measurement"
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
 
 class AreaClimateTargetSensor(AreaMeasurementSensor):
@@ -443,7 +443,7 @@ class AreaClimateTargetSensor(AreaMeasurementSensor):
         """Initialize the climate target temperature sensor."""
         super().__init__(coordinator, config_entry, "Climate Target", CONF_CLIMATE_ENTITY, UNIT_CELSIUS)
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = "measurement"
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
     def state(self) -> Optional[float]:

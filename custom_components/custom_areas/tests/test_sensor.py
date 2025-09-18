@@ -334,7 +334,7 @@ def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_
 
 def test_area_power_sensor(mock_coordinator, mock_config_entry, mock_hass):
     """Test area power sensor."""
-    from custom_components.custom_areas.sensor import AreaPowerSensor, UNIT_WATT
+    from custom_components.custom_areas.sensor import UNIT_WATT, AreaPowerSensor
 
     sensor = AreaPowerSensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -358,7 +358,7 @@ def test_area_power_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
 def test_area_energy_sensor(mock_coordinator, mock_config_entry, mock_hass):
     """Test area energy sensor."""
-    from custom_components.custom_areas.sensor import AreaEnergySensor, UNIT_WATT_HOUR
+    from custom_components.custom_areas.sensor import UNIT_WATT_HOUR, AreaEnergySensor
 
     sensor = AreaEnergySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -382,7 +382,7 @@ def test_area_energy_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
 def test_area_temperature_sensor(mock_coordinator, mock_config_entry, mock_hass):
     """Test area temperature sensor."""
-    from custom_components.custom_areas.sensor import AreaTemperatureSensor, UNIT_CELSIUS
+    from custom_components.custom_areas.sensor import UNIT_CELSIUS, AreaTemperatureSensor
 
     sensor = AreaTemperatureSensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
@@ -430,7 +430,7 @@ def test_area_humidity_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
 def test_area_climate_target_sensor(mock_coordinator, mock_config_entry, mock_hass):
     """Test area climate target sensor."""
-    from custom_components.custom_areas.sensor import AreaClimateTargetSensor, UNIT_CELSIUS
+    from custom_components.custom_areas.sensor import UNIT_CELSIUS, AreaClimateTargetSensor
 
     sensor = AreaClimateTargetSensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
