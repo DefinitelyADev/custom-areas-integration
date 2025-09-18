@@ -368,7 +368,7 @@ class AreaMeasurementSensor(SensorEntity):
         return f"custom_area_{area_name}_{measurement_type}" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         entity_id = self.config_entry.data.get(self.entity_config_key)
         if not entity_id:
@@ -437,7 +437,7 @@ class AreaClimateTargetSensor(AreaMeasurementSensor):
         self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the climate target temperature."""
         entity_id = self.config_entry.data.get(self.entity_config_key)
         if not entity_id:

@@ -350,7 +350,7 @@ def test_area_power_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
     mock_hass.states.get = mock_get
 
-    assert sensor.state == 25.5
+    assert sensor.native_value == 25.5
     assert sensor.native_unit_of_measurement == UNIT_WATT
     assert sensor.available is True
     assert isinstance(sensor.name, str) and "Power" in sensor.name
@@ -374,7 +374,7 @@ def test_area_energy_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
     mock_hass.states.get = mock_get
 
-    assert sensor.state == 150.0
+    assert sensor.native_value == 150.0
     assert sensor.native_unit_of_measurement == UNIT_WATT_HOUR
     assert sensor.available is True
     assert isinstance(sensor.name, str) and "Energy" in sensor.name
@@ -398,7 +398,7 @@ def test_area_temperature_sensor(mock_coordinator, mock_config_entry, mock_hass)
 
     mock_hass.states.get = mock_get
 
-    assert sensor.state == 22.3
+    assert sensor.native_value == 22.3
     assert sensor.native_unit_of_measurement == UNIT_CELSIUS
     assert sensor.available is True
     assert isinstance(sensor.name, str) and "Temperature" in sensor.name
@@ -422,7 +422,7 @@ def test_area_humidity_sensor(mock_coordinator, mock_config_entry, mock_hass):
 
     mock_hass.states.get = mock_get
 
-    assert sensor.state == 65.0
+    assert sensor.native_value == 65.0
     assert sensor.native_unit_of_measurement == PERCENTAGE
     assert sensor.available is True
     assert isinstance(sensor.name, str) and "Humidity" in sensor.name
@@ -447,7 +447,7 @@ def test_area_climate_target_sensor(mock_coordinator, mock_config_entry, mock_ha
 
     mock_hass.states.get = mock_get
 
-    assert sensor.state == 21.0
+    assert sensor.native_value == 21.0
     assert sensor.native_unit_of_measurement == UNIT_CELSIUS
     assert sensor.available is True
     assert isinstance(sensor.name, str) and "Climate Target" in sensor.name
