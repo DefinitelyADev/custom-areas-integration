@@ -337,16 +337,7 @@ class AreaMeasurementSensor(SensorEntity):
         entity_config_key: str,
         unit: str,
     ) -> None:
-        """Initialize the measurement sensor.
-
-        Set device_class and state_class for all measurement sensors so HA statistics/UX work correctly.
-        For example: Power -> device_class=power, state_class=measurement;
-        Energy -> device_class=energy with state_class=total_increasing;
-        Temperature -> temperature/measurement;
-        Humidity -> humidity/measurement;
-        Climate Target -> temperature/measurement.
-        Example here: add self._attr_device_class and self._attr_state_class in init.
-        """
+        """Initialize a measurement sensor for a specific area and measurement type."""
         self.coordinator = coordinator
         self.config_entry = config_entry
         self.measurement_type = measurement_type
