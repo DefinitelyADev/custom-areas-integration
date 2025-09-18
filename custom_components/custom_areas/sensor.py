@@ -3,9 +3,9 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import STATE_IDLE, STATE_ON, STATE_UNKNOWN
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -90,24 +90,6 @@ async def async_setup_entry(
 
     entities: list[SensorEntity] = [AreaSummarySensor(coordinator, config_entry)]
 
-    # Add individual measurement sensors if corresponding entities are configured
-    data = config_entry.data
-
-    if data.get(CONF_POWER_ENTITY):
-        entities.append(AreaPowerSensor(coordinator, config_entry))
-
-    if data.get(CONF_ENERGY_ENTITY):
-        entities.append(AreaEnergySensor(coordinator, config_entry))
-
-    if data.get(CONF_TEMP_ENTITY):
-        entities.append(AreaTemperatureSensor(coordinator, config_entry))
-
-    if data.get(CONF_HUMIDITY_ENTITY):
-        entities.append(AreaHumiditySensor(coordinator, config_entry))
-
-    if data.get(CONF_CLIMATE_ENTITY):
-        entities.append(AreaClimateTargetSensor(coordinator, config_entry))
-
     async_add_entities(entities)
 
 
@@ -120,7 +102,6 @@ class AreaSensorCoordinator:
         self.config_entry = config_entry
         self._listeners: list[Callable[..., Any]] = []
         self._summary_sensor: Optional["AreaSummarySensor"] = None
-        self._measurement_sensors: list["AreaMeasurementSensor"] = []
 
     async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
@@ -168,27 +149,11 @@ class AreaSensorCoordinator:
             _LOGGER.debug("State change for %s: %s -> %s", entity_id, old_state, new_state)
 
             self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
-
-        # Update relevant measurement sensors (only those affected by the changed entity)
-        if entity_id:
-            for sensor in self._measurement_sensors:
-                sensor_entity_id = sensor.config_entry.data.get(sensor.entity_config_key)
-                if sensor_entity_id == entity_id:
-                    sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
     def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
         """Register the summary sensor."""
         self._summary_sensor = sensor
-
-    def register_measurement_sensor(self, sensor: "AreaMeasurementSensor") -> None:
-        """Register a measurement sensor."""
-        self._measurement_sensors.append(sensor)
-
-    def unregister_measurement_sensor(self, sensor: "AreaMeasurementSensor") -> None:
-        """Unregister a measurement sensor."""
-        if sensor in self._measurement_sensors:
-            self._measurement_sensors.remove(sensor)
 
     def async_shutdown(self):
         """Clean up listeners."""
@@ -330,134 +295,38 @@ class AreaSummarySensor(SensorEntity):
             if climate_state:
                 attrs["climate_mode"] = climate_state.state
 
+        # Measurement attributes
+        power_entity = data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            power_value = get_numeric_state(self.hass, power_entity)
+            if power_value is not None:
+                attrs["power"] = power_value
+
+        energy_entity = data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            energy_value = get_numeric_state(self.hass, energy_entity)
+            if energy_value is not None:
+                attrs["energy"] = energy_value
+
+        temp_entity = data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            temp_value = get_numeric_state(self.hass, temp_entity)
+            if temp_value is not None:
+                attrs["temperature"] = temp_value
+
+        humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            humidity_value = get_numeric_state(self.hass, humidity_entity)
+            if humidity_value is not None:
+                attrs["humidity"] = humidity_value
+
+        if climate_entity:
+            climate_state = get_cached_state(climate_entity)
+            if climate_state and climate_state.attributes.get("temperature"):
+                try:
+                    climate_target = float(climate_state.attributes["temperature"])
+                    attrs["climate_target"] = climate_target
+                except (ValueError, TypeError):
+                    pass
+
         return attrs
-
-
-class AreaMeasurementSensor(SensorEntity):
-    """Base class for area measurement sensors."""
-
-    def __init__(
-        self,
-        coordinator: AreaSensorCoordinator,
-        config_entry: ConfigEntry,
-        measurement_type: str,
-        entity_config_key: str,
-        unit: str,
-    ) -> None:
-        """Initialize a measurement sensor for a specific area and measurement type."""
-        self.coordinator = coordinator
-        self.config_entry = config_entry
-        self.measurement_type = measurement_type
-        self.entity_config_key = entity_config_key
-
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
-        self._attr_name = f"{area_name} {measurement_type}"
-        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_{measurement_type.lower().replace(' ', '_')}"
-        self._attr_should_poll = False
-        self._attr_native_unit_of_measurement = unit
-
-        # Register with coordinator
-        coordinator.register_measurement_sensor(self)
-
-        # Set up device info (same device as summary sensor)
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
-            manufacturer="Areas Integration",
-            model="Area Sensor",
-        )
-
-    @property
-    def suggested_object_id(self) -> Optional[str]:
-        """Suggest object_id with area prefix."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
-        measurement_type = self.measurement_type.lower().replace(" ", "_")
-        return f"custom_area_{area_name}_{measurement_type}" if area_name else None
-
-    @property
-    def native_value(self) -> Optional[float]:
-        """Return the native value of the sensor."""
-        entity_id = self.config_entry.data.get(self.entity_config_key)
-        if not entity_id:
-            return None
-        return get_numeric_state(self.hass, entity_id)
-
-    @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        entity_id = self.config_entry.data.get(self.entity_config_key)
-        if not entity_id:
-            return False
-        state = self.hass.states.get(entity_id)
-        if state is None:
-            return False
-        return state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE)
-
-    async def async_will_remove_from_hass(self) -> None:
-        """Unregister from coordinator when entity is removed."""
-        self.coordinator.unregister_measurement_sensor(self)
-
-
-class AreaPowerSensor(AreaMeasurementSensor):
-    """Area power sensor."""
-
-    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
-        """Initialize the power sensor."""
-        super().__init__(coordinator, config_entry, "Power", CONF_POWER_ENTITY, UNIT_WATT)
-        self._attr_device_class = SensorDeviceClass.POWER
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-
-
-class AreaEnergySensor(AreaMeasurementSensor):
-    """Area energy sensor."""
-
-    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
-        """Initialize the energy sensor."""
-        super().__init__(coordinator, config_entry, "Energy", CONF_ENERGY_ENTITY, UNIT_WATT_HOUR)
-        self._attr_device_class = SensorDeviceClass.ENERGY
-        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-
-
-class AreaTemperatureSensor(AreaMeasurementSensor):
-    """Area temperature sensor."""
-
-    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
-        """Initialize the temperature sensor."""
-        super().__init__(coordinator, config_entry, "Temperature", CONF_TEMP_ENTITY, UNIT_CELSIUS)
-        self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-
-
-class AreaHumiditySensor(AreaMeasurementSensor):
-    """Area humidity sensor."""
-
-    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
-        """Initialize the humidity sensor."""
-        super().__init__(coordinator, config_entry, "Humidity", CONF_HUMIDITY_ENTITY, PERCENTAGE)
-        self._attr_device_class = SensorDeviceClass.HUMIDITY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-
-
-class AreaClimateTargetSensor(AreaMeasurementSensor):
-    """Area climate target temperature sensor."""
-
-    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
-        """Initialize the climate target temperature sensor."""
-        super().__init__(coordinator, config_entry, "Climate Target", CONF_CLIMATE_ENTITY, UNIT_CELSIUS)
-        self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-
-    @property
-    def native_value(self) -> Optional[float]:
-        """Return the climate target temperature."""
-        entity_id = self.config_entry.data.get(self.entity_config_key)
-        if not entity_id:
-            return None
-
-        climate_state = self.hass.states.get(entity_id)
-        if climate_state and climate_state.attributes.get("temperature"):
-            try:
-                return float(climate_state.attributes["temperature"])
-            except (ValueError, TypeError):
-                pass
-        return None
