@@ -18,7 +18,6 @@ DEFAULT_ICON = "mdi:texture-box"
 
 # State values
 STATE_ACTIVE = "active"
-STATE_IDLE = "idle"
 
 # Icons
 ICON_HOME = "mdi:home"

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, STATE_OFF, STATE_ON, STATE_UNKNOWN
+from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_OFF, STATE_ON, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 
 from custom_components.custom_areas.const import (
@@ -19,7 +19,6 @@ from custom_components.custom_areas.const import (
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
     STATE_ACTIVE,
-    STATE_IDLE,
 )
 from custom_components.custom_areas.sensor import AreaSensorCoordinator, AreaSummarySensor
 
