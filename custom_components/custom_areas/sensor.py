@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, STATE_ON
+from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_ON, STATE_UNKNOWN
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -16,22 +16,26 @@ try:
     from homeassistant.util.unit_conversion import UnitOfEnergy, UnitOfPower
     from homeassistant.util.unit_system import UnitOfTemperature
 
-    UNIT_CELSIUS = UnitOfTemperature.CELSIUS
-    UNIT_WATT = UnitOfPower.WATT
-    UNIT_WATT_HOUR = UnitOfEnergy.WATT_HOUR
+    UNIT_CELSIUS: str = UnitOfTemperature.CELSIUS
+    UNIT_HUMIDITY: str = PERCENTAGE
+    UNIT_WATT: str = UnitOfPower.WATT
+    UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
 except ImportError:
     # Fallback for older versions or if unit system constants don't exist
     try:
-        from homeassistant.const import ENERGY_WATT_HOUR, POWER_WATT, TEMP_CELSIUS
+        from homeassistant.const import ENERGY_WATT_HOUR  # pyright: ignore[reportAttributeAccessIssue]
+        from homeassistant.const import POWER_WATT  # pyright: ignore[reportAttributeAccessIssue]
+        from homeassistant.const import TEMP_CELSIUS  # pyright: ignore[reportAttributeAccessIssue]
 
         UNIT_CELSIUS = TEMP_CELSIUS
         UNIT_WATT = POWER_WATT
         UNIT_WATT_HOUR = ENERGY_WATT_HOUR
     except ImportError:
         # Final fallback for versions where these constants don't exist
-        UNIT_CELSIUS = "°C"
-        UNIT_WATT = "W"
-        UNIT_WATT_HOUR = "Wh"
+        UNIT_CELSIUS = "°C"  # pyright: ignore[reportAssignmentType]
+        UNIT_HUMIDITY = "%"  # pyright: ignore[reportAssignmentType]
+        UNIT_WATT = "W"  # pyright: ignore[reportAssignmentType]
+        UNIT_WATT_HOUR = "Wh"  # pyright: ignore[reportAssignmentType]
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -50,11 +54,32 @@ from .const import (
     ICON_MOTION,
     ICON_WINDOW_OPEN,
     STATE_ACTIVE,
-    STATE_IDLE,
-    STATE_UNKNOWN,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_numeric_state(hass: HomeAssistant, entity_id: str) -> Optional[float]:
+    """Get numeric state from entity.
+
+    Returns the parsed float value, or None if the entity doesn't exist
+    or the state cannot be converted to a float.
+    """
+    if not entity_id:
+        return None
+
+    state = hass.states.get(entity_id)
+    if state:
+        try:
+            return float(state.state)
+        except (ValueError, TypeError) as err:
+            _LOGGER.debug(
+                "Failed to convert state %s for entity %s: %s",
+                state.state,
+                entity_id,
+                err,
+            )
+    return None
 
 
 async def async_setup_entry(
@@ -65,7 +90,34 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    entities = [AreaSummarySensor(coordinator, config_entry)]
+    summary_sensor = AreaSummarySensor(coordinator, config_entry)
+    entities: list[SensorEntity] = [summary_sensor]
+
+    # Create measurement sensors conditionally
+    if config_entry.data.get(CONF_POWER_ENTITY):
+        power_sensor = PowerSensor(coordinator, config_entry)
+        entities.append(power_sensor)
+        summary_sensor.power_sensor = power_sensor
+
+    if config_entry.data.get(CONF_ENERGY_ENTITY):
+        energy_sensor = EnergySensor(coordinator, config_entry)
+        entities.append(energy_sensor)
+        summary_sensor.energy_sensor = energy_sensor
+
+    if config_entry.data.get(CONF_TEMP_ENTITY):
+        temperature_sensor = TemperatureSensor(coordinator, config_entry)
+        entities.append(temperature_sensor)
+        summary_sensor.temperature_sensor = temperature_sensor
+
+    if config_entry.data.get(CONF_HUMIDITY_ENTITY):
+        humidity_sensor = HumiditySensor(coordinator, config_entry)
+        entities.append(humidity_sensor)
+        summary_sensor.humidity_sensor = humidity_sensor
+
+    if config_entry.data.get(CONF_CLIMATE_ENTITY):
+        climate_target_sensor = ClimateTargetSensor(coordinator, config_entry)
+        entities.append(climate_target_sensor)
+        summary_sensor.climate_target_sensor = climate_target_sensor
 
     async_add_entities(entities)
 
@@ -78,7 +130,7 @@ class AreaSensorCoordinator:
         self.hass = hass
         self.config_entry = config_entry
         self._listeners: list[Callable[..., Any]] = []
-        self._summary_sensor: Optional["AreaSummarySensor"] = None
+        self._sensors: list[SensorEntity] = []
 
     async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
@@ -114,21 +166,14 @@ class AreaSensorCoordinator:
     @callback
     def _handle_state_change(self, event: Event) -> None:
         """Handle state change events."""
-        if self._summary_sensor:
-            # Extract data from event
-            event_data = event.data
-            entity_id = event_data.get("entity_id")
-            old_state = event_data.get("old_state")
-            new_state = event_data.get("new_state")
-
-            _LOGGER.debug("State change for %s: %s -> %s", entity_id, old_state, new_state)
-
-            self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
+        # Update all registered sensors
+        for sensor in self._sensors:
+            sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
-    def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
-        """Register the summary sensor."""
-        self._summary_sensor = sensor
+    def register_sensor(self, sensor: SensorEntity) -> None:
+        """Register a sensor."""
+        self._sensors.append(sensor)
 
     def async_shutdown(self):
         """Clean up listeners."""
@@ -148,8 +193,15 @@ class AreaSummarySensor(SensorEntity):
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
+        # References to measurement sensors
+        self.power_sensor: Optional["PowerSensor"] = None
+        self.energy_sensor: Optional["EnergySensor"] = None
+        self.temperature_sensor: Optional["TemperatureSensor"] = None
+        self.humidity_sensor: Optional["HumiditySensor"] = None
+        self.climate_target_sensor: Optional["ClimateTargetSensor"] = None
+
         # Register with coordinator
-        coordinator.register_summary_sensor(self)
+        coordinator.register_sensor(self)
 
         # Set up device info
         self._attr_device_info = DeviceInfo(
@@ -173,26 +225,6 @@ class AreaSummarySensor(SensorEntity):
         """
         area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}" if area_name else None
-
-    def _get_numeric_state(self, entity_id: str, default_value: float = 0.0) -> Optional[float]:
-        """Get numeric state from entity, with fallback to default."""
-        if not entity_id:
-            return None
-
-        state = self.hass.states.get(entity_id)
-        if state:
-            try:
-                value = float(state.state)
-                return value if value != 0.0 else default_value
-            except (ValueError, TypeError) as err:
-                _LOGGER.debug(
-                    "Failed to convert state %s for entity %s: %s",
-                    state.state,
-                    entity_id,
-                    err,
-                )
-                pass
-        return None
 
     @property
     def state(self) -> str:
@@ -231,9 +263,9 @@ class AreaSummarySensor(SensorEntity):
         ]
 
         if any(entity for entity in core_entities if entity):
-            return STATE_IDLE
+            return str(STATE_IDLE)
 
-        return STATE_UNKNOWN
+        return str(STATE_UNKNOWN)
 
     @property
     def icon(self) -> str:
@@ -255,7 +287,8 @@ class AreaSummarySensor(SensorEntity):
                 return ICON_MOTION
 
         # Return configured icon or default
-        return str(data.get(CONF_ICON, DEFAULT_ICON))
+        icon_value = data.get(CONF_ICON, DEFAULT_ICON)
+        return str(icon_value) if icon_value is not None else DEFAULT_ICON
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
@@ -272,64 +305,7 @@ class AreaSummarySensor(SensorEntity):
                 cached_states[entity_id] = self.hass.states.get(entity_id)
             return cached_states[entity_id]
 
-        def fmt(value: Optional[float], unit: str) -> Optional[str]:
-            """Format a numeric value with its unit for nice display.
-
-            Keep numbers compact: no trailing zeros, max 1 decimal place by default.
-            Returns None if value is None.
-            """
-            if value is None:
-                return None
-            try:
-                # Show up to 1 decimal place; strip trailing zeros/period
-                text = f"{float(value):.1f}".rstrip("0").rstrip(".")
-            except (TypeError, ValueError):
-                return None
-            return f"{text} {unit}"
-
-        # Core attributes with consistent error handling
-        power_entity = data.get(CONF_POWER_ENTITY)
-        if power_entity:
-            power_val = self._get_numeric_state(power_entity, 0.0) or 0.0
-            # Numeric attribute for automations
-            attrs["power_w"] = power_val
-            # Display-friendly attribute (value with unit)
-            power_disp = fmt(power_val, UNIT_WATT)
-            if power_disp is not None:
-                attrs["power"] = power_disp
-
-        energy_entity = data.get(CONF_ENERGY_ENTITY)
-        if energy_entity:
-            energy_val = self._get_numeric_state(energy_entity, 0.0) or 0.0
-            # Numeric attribute for automations
-            attrs["energy_wh"] = energy_val
-            # Display-friendly attribute
-            energy_disp = fmt(energy_val, UNIT_WATT_HOUR)
-            if energy_disp is not None:
-                attrs["energy"] = energy_disp
-
-        temp_entity = data.get(CONF_TEMP_ENTITY)
-        if temp_entity:
-            temp_value = self._get_numeric_state(temp_entity)
-            if temp_value is not None:  # Only add if we got a valid value
-                # Numeric attribute for automations
-                attrs["temperature_c"] = temp_value
-                # Display-friendly attribute
-                temp_disp = fmt(temp_value, UNIT_CELSIUS)
-                if temp_disp is not None:
-                    attrs["temperature"] = temp_disp
-
-        humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
-        if humidity_entity:
-            humidity_value = self._get_numeric_state(humidity_entity)
-            if humidity_value is not None:  # Only add if we got a valid value
-                # Numeric attribute for automations
-                attrs["humidity_pct"] = humidity_value
-                # Display-friendly attribute
-                humidity_disp = fmt(humidity_value, PERCENTAGE)
-                if humidity_disp is not None:
-                    attrs["humidity"] = humidity_disp
-
+        # Binary sensor attributes (motion, window, climate mode)
         motion_entity = data.get(CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = get_cached_state(motion_entity)
@@ -345,11 +321,274 @@ class AreaSummarySensor(SensorEntity):
             climate_state = get_cached_state(climate_entity)
             if climate_state:
                 attrs["climate_mode"] = climate_state.state
-                if climate_state.attributes.get("temperature"):
-                    t = climate_state.attributes["temperature"]
-                    attrs["climate_target_c"] = t
-                    t_disp = fmt(t, UNIT_CELSIUS)
-                    if t_disp is not None:
-                        attrs["climate_target"] = t_disp
+
+        # Measurement attributes
+        power_entity = data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            power_value = get_numeric_state(self.hass, power_entity)
+            if power_value is not None:
+                power_state = self.hass.states.get(power_entity)
+                unit = power_state.attributes.get("unit_of_measurement") if power_state else UNIT_WATT
+                attrs["power"] = f"{power_value} {unit}"
+
+        energy_entity = data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            energy_value = get_numeric_state(self.hass, energy_entity)
+            if energy_value is not None:
+                energy_state = self.hass.states.get(energy_entity)
+                unit = energy_state.attributes.get("unit_of_measurement") if energy_state else UNIT_WATT_HOUR
+                attrs["energy"] = f"{energy_value} {unit}"
+
+        temp_entity = data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            temp_value = get_numeric_state(self.hass, temp_entity)
+            if temp_value is not None:
+                temp_state = self.hass.states.get(temp_entity)
+                unit = temp_state.attributes.get("unit_of_measurement") if temp_state else UNIT_CELSIUS
+                attrs["temperature"] = f"{temp_value} {unit}"
+
+        humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            humidity_value = get_numeric_state(self.hass, humidity_entity)
+            if humidity_value is not None:
+                humidity_state = self.hass.states.get(humidity_entity)
+                unit = humidity_state.attributes.get("unit_of_measurement") if humidity_state else UNIT_HUMIDITY
+                attrs["humidity"] = f"{humidity_value} {unit}"
+
+        climate_entity = data.get(CONF_CLIMATE_ENTITY)
+        if climate_entity:
+            climate_state = self.hass.states.get(climate_entity)
+            if climate_state and climate_state.attributes.get("temperature"):
+                try:
+                    target_value = float(climate_state.attributes["temperature"])
+                    unit = climate_state.attributes.get("unit_of_measurement") or UNIT_CELSIUS
+                    attrs["climate_target"] = f"{target_value} {unit}"
+                except (ValueError, TypeError):
+                    pass
 
         return attrs
+
+
+class PowerSensor(SensorEntity):
+    """Power measurement sensor."""
+
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor."""
+        self.coordinator = coordinator
+        self.config_entry = config_entry
+        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = f"{area_name} Power"
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_power"
+        self._attr_should_poll = False
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
+        )
+        coordinator.register_sensor(self)
+
+    @property
+    def suggested_object_id(self) -> Optional[str]:
+        """Suggest object_id."""
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}_power" if area_name else None
+
+    @property
+    def state(self) -> Optional[float]:
+        """Return the state of the sensor."""
+        power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            return get_numeric_state(self.hass, power_entity)
+        return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            state = self.hass.states.get(power_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_WATT
+
+
+class EnergySensor(SensorEntity):
+    """Energy measurement sensor."""
+
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor."""
+        self.coordinator = coordinator
+        self.config_entry = config_entry
+        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = f"{area_name} Energy"
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_energy"
+        self._attr_should_poll = False
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
+        )
+        coordinator.register_sensor(self)
+
+    @property
+    def suggested_object_id(self) -> Optional[str]:
+        """Suggest object_id."""
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}_energy" if area_name else None
+
+    @property
+    def state(self) -> Optional[float]:
+        """Return the state of the sensor."""
+        energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            return get_numeric_state(self.hass, energy_entity)
+        return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            state = self.hass.states.get(energy_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_WATT_HOUR
+
+
+class TemperatureSensor(SensorEntity):
+    """Temperature measurement sensor."""
+
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor."""
+        self.coordinator = coordinator
+        self.config_entry = config_entry
+        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = f"{area_name} Temperature"
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_temperature"
+        self._attr_should_poll = False
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
+        )
+        coordinator.register_sensor(self)
+
+    @property
+    def suggested_object_id(self) -> Optional[str]:
+        """Suggest object_id."""
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}_temperature" if area_name else None
+
+    @property
+    def state(self) -> Optional[float]:
+        """Return the state of the sensor."""
+        temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            return get_numeric_state(self.hass, temp_entity)
+        return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            state = self.hass.states.get(temp_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_CELSIUS
+
+
+class HumiditySensor(SensorEntity):
+    """Humidity measurement sensor."""
+
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor."""
+        self.coordinator = coordinator
+        self.config_entry = config_entry
+        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = f"{area_name} Humidity"
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_humidity"
+        self._attr_should_poll = False
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
+        )
+        coordinator.register_sensor(self)
+
+    @property
+    def suggested_object_id(self) -> Optional[str]:
+        """Suggest object_id."""
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}_humidity" if area_name else None
+
+    @property
+    def state(self) -> Optional[float]:
+        """Return the state of the sensor."""
+        humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            return get_numeric_state(self.hass, humidity_entity)
+        return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            state = self.hass.states.get(humidity_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_HUMIDITY
+
+
+class ClimateTargetSensor(SensorEntity):
+    """Climate target temperature sensor."""
+
+    def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor."""
+        self.coordinator = coordinator
+        self.config_entry = config_entry
+        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = f"{area_name} Climate Target"
+        self._attr_unique_id = f"custom_area_{config_entry.entry_id}_climate_target"
+        self._attr_should_poll = False
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            manufacturer="Areas Integration",
+            model="Area Sensor",
+        )
+        coordinator.register_sensor(self)
+
+    @property
+    def suggested_object_id(self) -> Optional[str]:
+        """Suggest object_id."""
+        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        return f"custom_area_{area_name}_climate_target" if area_name else None
+
+    @property
+    def state(self) -> Optional[float]:
+        """Return the state of the sensor."""
+        climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
+        if climate_entity:
+            climate_state = self.hass.states.get(climate_entity)
+            if climate_state and climate_state.attributes.get("temperature"):
+                try:
+                    return float(climate_state.attributes["temperature"])
+                except (ValueError, TypeError):
+                    pass
+        return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
+        if climate_entity:
+            state = self.hass.states.get(climate_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_CELSIUS
