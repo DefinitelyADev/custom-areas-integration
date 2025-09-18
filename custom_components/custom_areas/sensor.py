@@ -88,7 +88,7 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    entities = [AreaSummarySensor(coordinator, config_entry)]
+    entities: list[SensorEntity] = [AreaSummarySensor(coordinator, config_entry)]
 
     # Add individual measurement sensors if corresponding entities are configured
     data = config_entry.data
@@ -334,7 +334,16 @@ class AreaMeasurementSensor(SensorEntity):
         entity_config_key: str,
         unit: str,
     ) -> None:
-        """Initialize the measurement sensor."""
+        """Initialize the measurement sensor.
+
+        Set device_class and state_class for all measurement sensors so HA statistics/UX work correctly.
+        For example: Power -> device_class=power, state_class=measurement;
+        Energy -> device_class=energy with state_class=total_increasing;
+        Temperature -> temperature/measurement;
+        Humidity -> humidity/measurement;
+        Climate Target -> temperature/measurement.
+        Example here: add self._attr_device_class and self._attr_state_class in init.
+        """
         self.coordinator = coordinator
         self.config_entry = config_entry
         self.measurement_type = measurement_type
@@ -387,6 +396,8 @@ class AreaPowerSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the power sensor."""
         super().__init__(coordinator, config_entry, "Power", CONF_POWER_ENTITY, UNIT_WATT)
+        self._attr_device_class = "power"
+        self._attr_state_class = "measurement"
 
 
 class AreaEnergySensor(AreaMeasurementSensor):
@@ -395,6 +406,8 @@ class AreaEnergySensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the energy sensor."""
         super().__init__(coordinator, config_entry, "Energy", CONF_ENERGY_ENTITY, UNIT_WATT_HOUR)
+        self._attr_device_class = "energy"
+        self._attr_state_class = "total_increasing"
 
 
 class AreaTemperatureSensor(AreaMeasurementSensor):
@@ -403,6 +416,8 @@ class AreaTemperatureSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the temperature sensor."""
         super().__init__(coordinator, config_entry, "Temperature", CONF_TEMP_ENTITY, UNIT_CELSIUS)
+        self._attr_device_class = "temperature"
+        self._attr_state_class = "measurement"
 
 
 class AreaHumiditySensor(AreaMeasurementSensor):
@@ -411,6 +426,8 @@ class AreaHumiditySensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the humidity sensor."""
         super().__init__(coordinator, config_entry, "Humidity", CONF_HUMIDITY_ENTITY, PERCENTAGE)
+        self._attr_device_class = "humidity"
+        self._attr_state_class = "measurement"
 
 
 class AreaClimateTargetSensor(AreaMeasurementSensor):
@@ -419,6 +436,8 @@ class AreaClimateTargetSensor(AreaMeasurementSensor):
     def __init__(self, coordinator: AreaSensorCoordinator, config_entry: ConfigEntry) -> None:
         """Initialize the climate target temperature sensor."""
         super().__init__(coordinator, config_entry, "Climate Target", CONF_CLIMATE_ENTITY, UNIT_CELSIUS)
+        self._attr_device_class = "temperature"
+        self._attr_state_class = "measurement"
 
     @property
     def state(self) -> Optional[float]:
