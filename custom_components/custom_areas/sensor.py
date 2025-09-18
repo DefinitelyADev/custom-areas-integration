@@ -97,6 +97,7 @@ class AreaSensorCoordinator:
         self.config_entry = config_entry
         self._listeners: list[Callable[..., Any]] = []
         self._summary_sensor: Optional["AreaSummarySensor"] = None
+        self._measurement_sensors: list["AreaMeasurementSensor"] = []
 
     async def async_config_entry_first_refresh(self) -> None:
         """Set up state change listeners."""
@@ -132,6 +133,7 @@ class AreaSensorCoordinator:
     @callback
     def _handle_state_change(self, event: Event) -> None:
         """Handle state change events."""
+        # Update summary sensor
         if self._summary_sensor:
             # Extract data from event
             event_data = event.data
@@ -142,11 +144,19 @@ class AreaSensorCoordinator:
             _LOGGER.debug("State change for %s: %s -> %s", entity_id, old_state, new_state)
 
             self._summary_sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
+
+        # Update relevant measurement sensors
+        for sensor in self._measurement_sensors:
+            sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
         return
 
     def register_summary_sensor(self, sensor: "AreaSummarySensor") -> None:
         """Register the summary sensor."""
         self._summary_sensor = sensor
+
+    def register_measurement_sensor(self, sensor: "AreaMeasurementSensor") -> None:
+        """Register a measurement sensor."""
+        self._measurement_sensors.append(sensor)
 
     def async_shutdown(self):
         """Clean up listeners."""
@@ -332,6 +342,9 @@ class AreaMeasurementSensor(SensorEntity):
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_{measurement_type.lower().replace(' ', '_')}"
         self._attr_should_poll = False
         self._attr_native_unit_of_measurement = unit
+
+        # Register with coordinator
+        coordinator.register_measurement_sensor(self)
 
         # Set up device info (same device as summary sensor)
         self._attr_device_info = DeviceInfo(
