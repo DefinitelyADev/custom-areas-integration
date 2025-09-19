@@ -322,22 +322,48 @@ class AreaSummarySensor(SensorEntity):
                 attrs["climate_mode"] = climate_state.state
 
         # Measurement attributes
-        if self.power_sensor and self.power_sensor.state is not None:
-            attrs["power"] = f"{self.power_sensor.state} {self.power_sensor.unit_of_measurement}"
+        power_entity = data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            power_value = get_numeric_state(self.hass, power_entity)
+            if power_value is not None:
+                power_state = self.hass.states.get(power_entity)
+                unit = power_state.attributes.get("unit_of_measurement") if power_state else UNIT_WATT
+                attrs["power"] = f"{power_value} {unit}"
 
-        if self.energy_sensor and self.energy_sensor.state is not None:
-            attrs["energy"] = f"{self.energy_sensor.state} {self.energy_sensor.unit_of_measurement}"
+        energy_entity = data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            energy_value = get_numeric_state(self.hass, energy_entity)
+            if energy_value is not None:
+                energy_state = self.hass.states.get(energy_entity)
+                unit = energy_state.attributes.get("unit_of_measurement") if energy_state else UNIT_WATT_HOUR
+                attrs["energy"] = f"{energy_value} {unit}"
 
-        if self.temperature_sensor and self.temperature_sensor.state is not None:
-            attrs["temperature"] = f"{self.temperature_sensor.state} {self.temperature_sensor.unit_of_measurement}"
+        temp_entity = data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            temp_value = get_numeric_state(self.hass, temp_entity)
+            if temp_value is not None:
+                temp_state = self.hass.states.get(temp_entity)
+                unit = temp_state.attributes.get("unit_of_measurement") if temp_state else UNIT_CELSIUS
+                attrs["temperature"] = f"{temp_value} {unit}"
 
-        if self.humidity_sensor and self.humidity_sensor.state is not None:
-            attrs["humidity"] = f"{self.humidity_sensor.state} {self.humidity_sensor.unit_of_measurement}"
+        humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            humidity_value = get_numeric_state(self.hass, humidity_entity)
+            if humidity_value is not None:
+                humidity_state = self.hass.states.get(humidity_entity)
+                unit = humidity_state.attributes.get("unit_of_measurement") if humidity_state else UNIT_HUMIDITY
+                attrs["humidity"] = f"{humidity_value} {unit}"
 
-        if self.climate_target_sensor and self.climate_target_sensor.state is not None:
-            attrs["climate_target"] = (
-                f"{self.climate_target_sensor.state} {self.climate_target_sensor.unit_of_measurement}"
-            )
+        climate_entity = data.get(CONF_CLIMATE_ENTITY)
+        if climate_entity:
+            climate_state = self.hass.states.get(climate_entity)
+            if climate_state and climate_state.attributes.get("temperature"):
+                try:
+                    target_value = float(climate_state.attributes["temperature"])
+                    unit = climate_state.attributes.get("unit_of_measurement") or UNIT_CELSIUS
+                    attrs["climate_target"] = f"{target_value} {unit}"
+                except (ValueError, TypeError):
+                    pass
 
         return attrs
 
