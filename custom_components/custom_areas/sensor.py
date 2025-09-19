@@ -16,10 +16,10 @@ try:
     from homeassistant.util.unit_conversion import UnitOfEnergy, UnitOfPower
     from homeassistant.util.unit_system import UnitOfTemperature
 
-    UNIT_CELSIUS: UnitOfTemperature = UnitOfTemperature.CELSIUS
+    UNIT_CELSIUS: str = UnitOfTemperature.CELSIUS
     UNIT_HUMIDITY: str = PERCENTAGE
-    UNIT_WATT: UnitOfPower = UnitOfPower.WATT
-    UNIT_WATT_HOUR: UnitOfEnergy = UnitOfEnergy.WATT_HOUR
+    UNIT_WATT: str = UnitOfPower.WATT
+    UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
 except ImportError:
     # Fallback for older versions or if unit system constants don't exist
     try:
@@ -375,6 +375,16 @@ class PowerSensor(SensorEntity):
             return get_numeric_state(self.hass, power_entity)
         return None
 
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
+        if power_entity:
+            state = self.hass.states.get(power_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_WATT
+
 
 class EnergySensor(SensorEntity):
     """Energy measurement sensor."""
@@ -408,6 +418,16 @@ class EnergySensor(SensorEntity):
         if energy_entity:
             return get_numeric_state(self.hass, energy_entity)
         return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
+        if energy_entity:
+            state = self.hass.states.get(energy_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_WATT_HOUR
 
 
 class TemperatureSensor(SensorEntity):
@@ -443,6 +463,16 @@ class TemperatureSensor(SensorEntity):
             return get_numeric_state(self.hass, temp_entity)
         return None
 
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
+        if temp_entity:
+            state = self.hass.states.get(temp_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_CELSIUS
+
 
 class HumiditySensor(SensorEntity):
     """Humidity measurement sensor."""
@@ -476,6 +506,16 @@ class HumiditySensor(SensorEntity):
         if humidity_entity:
             return get_numeric_state(self.hass, humidity_entity)
         return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
+        if humidity_entity:
+            state = self.hass.states.get(humidity_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_HUMIDITY
 
 
 class ClimateTargetSensor(SensorEntity):
@@ -515,3 +555,13 @@ class ClimateTargetSensor(SensorEntity):
                 except (ValueError, TypeError):
                     pass
         return None
+
+    @property
+    def unit_of_measurement(self) -> Optional[str]:
+        """Return the unit of measurement."""
+        climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
+        if climate_entity:
+            state = self.hass.states.get(climate_entity)
+            if state and state.attributes.get("unit_of_measurement"):
+                return state.attributes["unit_of_measurement"]  # type: ignore[no-any-return]
+        return UNIT_CELSIUS

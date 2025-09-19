@@ -196,19 +196,23 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
 
     climate_state = MagicMock()
     climate_state.state = "heat"
-    climate_state.attributes = {"temperature": 21.5}
+    climate_state.attributes = {"temperature": 21.5, "unit_of_measurement": "°C"}
 
     power_state = MagicMock()
     power_state.state = "25.5"
+    power_state.attributes = {"unit_of_measurement": "W"}
 
     energy_state = MagicMock()
     energy_state.state = "150.0"
+    energy_state.attributes = {"unit_of_measurement": "Wh"}
 
     temp_state = MagicMock()
     temp_state.state = "22.3"
+    temp_state.attributes = {"unit_of_measurement": "°C"}
 
     humidity_state = MagicMock()
     humidity_state.state = "65.0"
+    humidity_state.attributes = {"unit_of_measurement": "%"}
 
     def mock_get(entity_id):
         if entity_id == "binary_sensor.motion":
@@ -237,11 +241,11 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     assert attrs["climate_mode"] == "heat"
 
     # Measurement attributes should now be present as strings with units
-    assert attrs["power"] == "25.5 None"
-    assert attrs["energy"] == "150.0 None"
-    assert attrs["temperature"] == "22.3 None"
-    assert attrs["humidity"] == "65.0 None"
-    assert attrs["climate_target"] == "21.5 None"
+    assert attrs["power"] == "25.5 W"
+    assert attrs["energy"] == "150.0 Wh"
+    assert attrs["temperature"] == "22.3 °C"
+    assert attrs["humidity"] == "65.0 %"
+    assert attrs["climate_target"] == "21.5 °C"
 
 
 def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
