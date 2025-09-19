@@ -5,13 +5,7 @@ All notable changes to the Rooms integration will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### BREAKING CHANGES
-- Removed duplicate sensor attributes that violated Home Assistant best practices. Each measurement type now has its own dedicated sensor with proper unit of measurement instead of duplicate attributes on the summary sensor.
-- Summary sensor no longer includes `power_w`, `energy_wh`, `temperature_c`, `humidity_pct`, `climate_target_c` (numeric) and `power`, `energy`, `temperature`, `humidity`, `climate_target` (formatted string) attributes.
-- Each area now creates separate sensors for each configured measurement: Power (W), Energy (Wh), Temperature (°C), Humidity (%), and Climate Target (°C).
-- Summary sensor now focuses on area state (active/idle/unknown) and binary attributes (`occupied`, `window_open`, `climate_mode`).
+## ## [1.2.0] - TBD
 
 ### Added
 - Individual measurement sensors: `AreaPowerSensor`, `AreaEnergySensor`, `AreaTemperatureSensor`, `AreaHumiditySensor`, `AreaClimateTargetSensor`
@@ -19,7 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better separation of concerns: summary sensor for state, individual sensors for measurements
 
 ### Fixed
-- Eliminates sensor duplication issue where same measurement appeared as both numeric and formatted string attributes
 - Allows users to control precision and formatting through Home Assistant's built-in sensor features
 - Follows Home Assistant sensor design principles
 
