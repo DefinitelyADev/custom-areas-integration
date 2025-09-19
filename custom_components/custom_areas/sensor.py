@@ -33,6 +33,7 @@ except ImportError:
     except ImportError:
         # Final fallback for versions where these constants don't exist
         UNIT_CELSIUS = "°C"  # pyright: ignore[reportAssignmentType]
+        UNIT_HUMIDITY = "%"  # pyright: ignore[reportAssignmentType]
         UNIT_WATT = "W"  # pyright: ignore[reportAssignmentType]
         UNIT_WATT_HOUR = "Wh"  # pyright: ignore[reportAssignmentType]
 
