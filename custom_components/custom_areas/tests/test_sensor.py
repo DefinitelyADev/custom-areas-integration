@@ -20,7 +20,15 @@ from custom_components.custom_areas.const import (
     CONF_WINDOW_ENTITY,
     STATE_ACTIVE,
 )
-from custom_components.custom_areas.sensor import AreaSensorCoordinator, AreaSummarySensor
+from custom_components.custom_areas.sensor import (
+    AreaSensorCoordinator,
+    AreaSummarySensor,
+    ClimateTargetSensor,
+    EnergySensor,
+    HumiditySensor,
+    PowerSensor,
+    TemperatureSensor,
+)
 
 
 @pytest.fixture
@@ -153,6 +161,32 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor.hass = mock_hass
 
+    # Create and assign measurement sensors
+    power_sensor = PowerSensor(mock_coordinator, mock_config_entry)
+    power_sensor.hass = mock_hass
+    setattr(power_sensor, "_attr_unit_of_measurement", "W")
+    sensor.power_sensor = power_sensor
+
+    energy_sensor = EnergySensor(mock_coordinator, mock_config_entry)
+    energy_sensor.hass = mock_hass
+    setattr(energy_sensor, "_attr_unit_of_measurement", "Wh")
+    sensor.energy_sensor = energy_sensor
+
+    temperature_sensor = TemperatureSensor(mock_coordinator, mock_config_entry)
+    temperature_sensor.hass = mock_hass
+    setattr(temperature_sensor, "_attr_unit_of_measurement", "°C")
+    sensor.temperature_sensor = temperature_sensor
+
+    humidity_sensor = HumiditySensor(mock_coordinator, mock_config_entry)
+    humidity_sensor.hass = mock_hass
+    setattr(humidity_sensor, "_attr_unit_of_measurement", "%")
+    sensor.humidity_sensor = humidity_sensor
+
+    climate_target_sensor = ClimateTargetSensor(mock_coordinator, mock_config_entry)
+    climate_target_sensor.hass = mock_hass
+    setattr(climate_target_sensor, "_attr_unit_of_measurement", "°C")
+    sensor.climate_target_sensor = climate_target_sensor
+
     # Mock states
     motion_state = MagicMock()
     motion_state.state = STATE_ON
@@ -202,12 +236,12 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     assert attrs["window_open"] is False
     assert attrs["climate_mode"] == "heat"
 
-    # Measurement attributes should now be present
-    assert attrs["power"] == 25.5
-    assert attrs["energy"] == 150.0
-    assert attrs["temperature"] == 22.3
-    assert attrs["humidity"] == 65.0
-    assert attrs["climate_target"] == 21.5
+    # Measurement attributes should now be present as strings with units
+    assert attrs["power"] == "25.5 None"
+    assert attrs["energy"] == "150.0 None"
+    assert attrs["temperature"] == "22.3 None"
+    assert attrs["humidity"] == "65.0 None"
+    assert attrs["climate_target"] == "21.5 None"
 
 
 def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
