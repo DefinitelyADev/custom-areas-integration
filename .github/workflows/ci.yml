@@ -6,7 +6,9 @@ permissions:
 on:
   push:
     branches: [ master, main ]
-    tags: [ 'v[0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]*', 'v[0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]' ]
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
