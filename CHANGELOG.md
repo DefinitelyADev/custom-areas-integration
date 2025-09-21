@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Updated CI workflow tag patterns to restrict triggers to version tags matching `vX.X.X` or `vX.X.X-<short-commit-hash>`
+- Fixed Codecov action input to use 'files' instead of 'file'
 - Fixed workflow permissions to resolve code scanning alerts
 
 ## [1.2.0] - 2025-09-22
