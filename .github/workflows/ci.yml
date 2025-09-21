@@ -117,7 +117,7 @@ jobs:
         name: ${{ github.ref_name }}
         draft: false
         prerelease: ${{ contains(github.ref_name, '-') }}
-        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
     runs-on: ubuntu-latest
