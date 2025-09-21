@@ -1,0 +1,24 @@
+# Label for documentation changes
+docs:
+- changed-files:
+  - any-glob-to-any-file: 'docs/**'
+
+# Label for test changes
+tests:
+- changed-files:
+  - any-glob-to-any-file: 'custom_components/custom_areas/tests/**'
+
+# Label for code changes
+code:
+- changed-files:
+  - any-glob-to-any-file: 'custom_components/**'
+
+# Label for configuration changes
+dependencies:
+- changed-files:
+  - any-glob-to-any-file: ['pyproject.toml', 'requirements-dev.txt', 'pytest.ini', 'pyrightconfig.json', 'mkdocs.yml']
+
+# Label for CI changes
+github_actions:
+- changed-files:
+  - any-glob-to-any-file: '.github/**'
