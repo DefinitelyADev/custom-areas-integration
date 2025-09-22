@@ -4,6 +4,13 @@
 
 A custom integration for Home Assistant that creates composite "Area" sensors with UI configuration.
 
+[![CI](https://github.com/DefinitelyADev/custom-areas-integration/actions/workflows/ci.yml/badge.svg)](https://github.com/DefinitelyADev/custom-areas-integration/actions/workflows/ci.yml)
+[![HACS](https://img.shields.io/badge/HACS-Custom%20Areas-blue.svg)](https://github.com/hacs/integration)
+[![codecov](https://codecov.io/gh/DefinitelyADev/custom-areas-integration/branch/master/graph/badge.svg)](https://codecov.io/gh/DefinitelyADev/custom-areas-integration)
+[![Release](https://img.shields.io/github/v/release/DefinitelyADev/custom-areas-integration?sort=semver)](https://github.com/DefinitelyADev/custom-areas-integration/releases)
+![Python Versions](https://img.shields.io/badge/python-3.10+-blue.svg)
+![GitHub License](https://img.shields.io/github/license/DefinitelyADev/custom-areas-integration)
+
 ## Features
 
 - **UI Configuration**: Add areas through Home Assistant's UI with an intuitive config flow
