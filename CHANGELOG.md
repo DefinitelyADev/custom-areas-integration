@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - GitHub Actions labeler configuration for automatic PR labeling based on modified paths
 - Coverage reporting to pytest with XML output for CI integration
+- GitHub Actions workflow to automatically manage stale issues and pull requests
 
 ### Fixed
 - Updated CI workflow to upload coverage reports for Python 3.12
