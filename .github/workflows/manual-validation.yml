@@ -23,7 +23,7 @@ jobs:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'tests'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -43,7 +43,7 @@ jobs:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'validate'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -63,7 +63,7 @@ jobs:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'lint'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -85,7 +85,7 @@ jobs:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'type-check'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -109,7 +109,7 @@ jobs:
     if: inputs.validation_type == 'all' || inputs.validation_type == 'hacs'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: HACS validation
       uses: hacs/action@main
