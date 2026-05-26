@@ -140,7 +140,7 @@ jobs:
       uses: home-assistant/actions/hassfest@master
 
   release:
-    needs: [test, validate, type-check, lint, hacs-validation]
+    needs: [test, validate, type-check, lint, hacs-validation, hassfest]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     permissions:
