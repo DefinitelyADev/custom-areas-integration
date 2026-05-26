@@ -22,7 +22,7 @@ Welcome to the Custom Areas Integration documentation! This comprehensive docume
 ## 📋 Key Features
 
 - ✅ **UI Configuration** - Easy setup through Home Assistant's interface
-- ✅ **Composite Sensors** - Single sensor representing multiple room aspects
+- ✅ **Composite Sensors** - Summary sensor (plus per-measurement passthroughs) representing multiple area aspects
 - ✅ **Real-time Updates** - Event-driven updates, no polling required
 - ✅ **Device Registry** - Proper integration with Home Assistant's device system
 - ✅ **Flexible Configuration** - Support for power, energy, temperature, humidity, motion, windows, and climate entities
@@ -32,7 +32,7 @@ Welcome to the Custom Areas Integration documentation! This comprehensive docume
 The integration consists of:
 - **Config Flow** - Handles UI configuration and validation
 - **Sensor Coordinator** - Manages state updates and event listeners
-- **Area Sensor** - Main entity providing room state and attributes
+- **Area Sensor** - Main entity providing area state and attributes
 - **Device Registry** - Creates proper device entries
 
 ## 🔧 Development
@@ -93,7 +93,7 @@ We welcome contributions! See the [Contributing section](../README.md#contributi
 ## 📈 Roadmap
 
 Future enhancements may include:
-- Room hierarchies and grouping
+- Area hierarchies and grouping
 - Enhanced energy monitoring
 - Historical analytics
 - Advanced automation templates
