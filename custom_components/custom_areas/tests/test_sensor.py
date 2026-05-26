@@ -392,3 +392,25 @@ def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_
     assert attrs["energy"] == "1000.0 Wh"
     assert attrs["temperature"] == "20.0 °C"
     assert attrs["humidity"] == "55.0 %"
+
+
+def test_coordinator_listener_cleanup(mock_coordinator):
+    """`async_shutdown` invokes every registered removal callback.
+
+    The coordinator stores listener removal callables in ``self._listeners``
+    (typically the return value of ``async_track_state_change_event``).
+    On shutdown each one must be called exactly once so HA stops dispatching
+    state-change events into a torn-down config entry.
+
+    NB: Phase 3 may rename ``async_shutdown`` → ``shutdown`` (M5). When that
+    lands, update the method-name reference here.
+    """
+    removal_cb_1 = MagicMock()
+    removal_cb_2 = MagicMock()
+    mock_coordinator._listeners.append(removal_cb_1)
+    mock_coordinator._listeners.append(removal_cb_2)
+
+    mock_coordinator.async_shutdown()
+
+    removal_cb_1.assert_called_once_with()
+    removal_cb_2.assert_called_once_with()
