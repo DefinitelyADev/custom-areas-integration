@@ -1,22 +1,22 @@
 # Configuration Examples
 
-This document provides practical examples of how to configure rooms for different scenarios.
+This document provides practical examples of how to configure areas for different scenarios.
 
-## Basic Room Configuration
+## Basic Area Configuration
 
 ### Living Room with Motion Detection
 ```
-Room Name: Living Room
+Area Name: Living Room
 Motion Sensor: binary_sensor.living_room_motion
 Temperature Sensor: sensor.living_room_temperature
 Active Power Threshold: 10
 ```
 
-**Use Case**: Basic room monitoring with motion detection and temperature tracking.
+**Use Case**: Basic area monitoring with motion detection and temperature tracking.
 
 ### Home Office with Power Monitoring
 ```
-Room Name: Home Office
+Area Name: Home Office
 Power Sensor: sensor.home_office_power
 Motion Sensor: binary_sensor.home_office_motion
 Temperature Sensor: sensor.home_office_temperature
@@ -29,7 +29,7 @@ Active Power Threshold: 50
 
 ### Kitchen with Multiple Sensors
 ```
-Room Name: Kitchen
+Area Name: Kitchen
 Power Sensor: sensor.kitchen_power
 Motion Sensor: binary_sensor.kitchen_motion
 Temperature Sensor: sensor.kitchen_temperature
@@ -42,7 +42,7 @@ Active Power Threshold: 25
 
 ### Bedroom with Climate Control
 ```
-Room Name: Master Bedroom
+Area Name: Master Bedroom
 Motion Sensor: binary_sensor.master_bedroom_motion
 Temperature Sensor: sensor.master_bedroom_temperature
 Humidity Sensor: sensor.master_bedroom_humidity
@@ -55,7 +55,7 @@ Active Power Threshold: 5
 
 ### Bathroom with Ventilation
 ```
-Room Name: Main Bathroom
+Area Name: Main Bathroom
 Motion Sensor: binary_sensor.bathroom_motion
 Humidity Sensor: sensor.bathroom_humidity
 Window Sensor: binary_sensor.bathroom_window
@@ -68,7 +68,7 @@ Active Power Threshold: 15
 
 ### Home Theater Setup
 ```
-Room Name: Home Theater
+Area Name: Home Theater
 Power Sensor: sensor.av_receiver_power
 Motion Sensor: binary_sensor.home_theater_motion
 Temperature Sensor: sensor.home_theater_temperature
@@ -79,26 +79,26 @@ Active Power Threshold: 20
 
 ### Laundry Room
 ```
-Room Name: Laundry Room
+Area Name: Laundry Room
 Power Sensor: sensor.washer_power
 Motion Sensor: binary_sensor.laundry_motion
 Temperature Sensor: sensor.laundry_temperature
 Active Power Threshold: 10
 ```
 
-**Use Case**: Utility room with appliance power monitoring.
+**Use Case**: Utility area with appliance power monitoring.
 
 ## Automation Integration Examples
 
 ### Lighting Automation Trigger
-Use the room state in automations:
+Use the area state in automations:
 
 ```yaml
 automation:
   - alias: "Living Room Lights On"
     trigger:
       platform: state
-      entity_id: sensor.living_room_summary
+      entity_id: sensor.custom_area_living_room
       to: 'active'
     action:
       service: light.turn_on
@@ -111,7 +111,7 @@ automation:
   - alias: "Bedroom Climate Control"
     trigger:
       platform: state
-      entity_id: sensor.master_bedroom_summary
+      entity_id: sensor.custom_area_master_bedroom
       to: 'active'
     action:
       service: climate.set_temperature
@@ -126,68 +126,68 @@ automation:
   - alias: "Kitchen Window Alert"
     trigger:
       platform: state
-      entity_id: sensor.kitchen_summary
+      entity_id: sensor.custom_area_kitchen
       attribute: window_open
       to: true
     condition:
       condition: state
-      entity_id: sensor.kitchen_summary
+      entity_id: sensor.custom_area_kitchen
       state: 'idle'
     action:
       service: notify.mobile_app
       data:
-        message: "Kitchen window opened while room is unoccupied"
+        message: "Kitchen window opened while area is unoccupied"
 ```
 
 ## Dashboard Examples
 
-### Room Status Card
+### Area Status Card
 ```yaml
 type: entities
 entities:
-  - entity: sensor.living_room_summary
+  - entity: sensor.custom_area_living_room
   - type: attribute
-    entity: sensor.living_room_summary
+    entity: sensor.custom_area_living_room
   attribute: temperature
     name: Temperature
   - type: attribute
-    entity: sensor.living_room_summary
+    entity: sensor.custom_area_living_room
   attribute: power
   name: Power
   - type: attribute
-    entity: sensor.living_room_summary
+    entity: sensor.custom_area_living_room
     attribute: occupied
     name: Motion Detected
 ```
 
-### Multi-Room Overview
+### Multi-Area Overview
 ```yaml
 type: glance
-title: Room Status
+title: Area Status
 entities:
-  - sensor.living_room_summary
-  - sensor.kitchen_summary
-  - sensor.home_office_summary
-  - sensor.master_bedroom_summary
+  - sensor.custom_area_living_room
+  - sensor.custom_area_kitchen
+  - sensor.custom_area_home_office
+  - sensor.custom_area_master_bedroom
 ```
 
 ## Troubleshooting Examples
 
 ### Debug State Attributes
-Check all attributes of a room sensor:
+Check all attributes of an area sensor:
 ```yaml
 service: system_log.write
 data:
-  message: "Room attributes: {{ state_attr('sensor.living_room_summary', 'all') }}"
+  message: "Area attributes: {{ state_attr('sensor.custom_area_living_room', 'all') }}"
 ```
 
 ### Monitor State Changes
 ```yaml
 automation:
-  - alias: "Room State Monitor"
+  - alias: "Area State Monitor"
     trigger:
       platform: state
-      entity_id: sensor.living_room_summary
+      entity_id: sensor.custom_area_living_room
     action:
       service: system_log.write
       data:
@@ -197,12 +197,12 @@ automation:
 ## Best Practices
 
 ### Sensor Selection
-- Choose sensors that accurately represent room activity
-- Use appropriate power thresholds for different room types
+- Choose sensors that accurately represent area activity
+- Use appropriate power thresholds for different area types
 - Consider both motion and power for comprehensive detection
 
 ### Naming Conventions
-- Use descriptive room names
+- Use descriptive area names
 - Keep names consistent with your Home Assistant entity naming
 - Include location context when needed
 
@@ -212,6 +212,6 @@ automation:
 - Adjust based on false positives/negatives
 
 ### Entity Organization
-- Group related sensors by room
+- Group related sensors by area
 - Use consistent naming patterns
 - Document sensor purposes in entity names
