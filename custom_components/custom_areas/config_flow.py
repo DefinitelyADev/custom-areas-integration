@@ -7,6 +7,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.helpers import selector
+from homeassistant.util import slugify
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -46,8 +47,10 @@ class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: Dict[str, str] = {}
 
         if user_input is not None:
-            # Validate area name is unique
-            await self.async_set_unique_id(user_input[CONF_AREA_NAME])
+            # Validate area name is unique. Slugify first so "Living Room",
+            # "living room", and " Living Room " all collide on the same
+            # unique_id rather than coexisting as separate entries.
+            await self.async_set_unique_id(slugify(user_input[CONF_AREA_NAME]))
             self._abort_if_unique_id_configured()
 
             # Ensure icon has a default value if not provided
