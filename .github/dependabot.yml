@@ -4,6 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # pytest, pytest-asyncio, and pytest-cov are pinned exactly by
+    # pytest-homeassistant-custom-component. Dependabot bumps of these break
+    # CI until phacc itself loosens. Let phacc drive these transitively.
+    ignore:
+      - dependency-name: "pytest"
+      - dependency-name: "pytest-asyncio"
+      - dependency-name: "pytest-cov"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
