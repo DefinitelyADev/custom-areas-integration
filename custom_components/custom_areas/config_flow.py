@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.helpers import selector
 
 from .const import (
@@ -26,9 +26,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class AreasConfigFlow(
-    config_entries.ConfigFlow, domain=DOMAIN
-):  # type: ignore[call-arg]  # HA's __init_subclass__ accepts domain parameter
+class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Areas."""
 
     VERSION = 1
@@ -38,7 +36,7 @@ class AreasConfigFlow(
         """Initialize the config flow."""
         self._data = {}
 
-    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None) -> FlowResult:
+    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: Dict[str, str] = {}
 
@@ -54,7 +52,7 @@ class AreasConfigFlow(
             return self.async_create_entry(
                 title=user_input[CONF_AREA_NAME],
                 data=user_input,
-            )  # pyright: ignore[reportReturnType]
+            )
 
         return self.async_show_form(
             step_id="user",
@@ -89,4 +87,4 @@ class AreasConfigFlow(
                 }
             ),
             errors=errors,
-        )  # pyright: ignore[reportReturnType]
+        )

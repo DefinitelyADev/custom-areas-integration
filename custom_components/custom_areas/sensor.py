@@ -5,37 +5,19 @@ from typing import Any, Callable, Dict, Optional
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, STATE_IDLE, STATE_ON, STATE_UNKNOWN
+from homeassistant.const import (
+    PERCENTAGE,
+    STATE_IDLE,
+    STATE_ON,
+    STATE_UNKNOWN,
+    UnitOfEnergy,
+    UnitOfPower,
+    UnitOfTemperature,
+)
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_state_change_event
-
-# Try to import unit constants, fall back to local definitions if not available
-try:
-    from homeassistant.util.unit_conversion import UnitOfEnergy, UnitOfPower
-    from homeassistant.util.unit_system import UnitOfTemperature
-
-    UNIT_CELSIUS: str = UnitOfTemperature.CELSIUS
-    UNIT_HUMIDITY: str = PERCENTAGE
-    UNIT_WATT: str = UnitOfPower.WATT
-    UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
-except ImportError:
-    # Fallback for older versions or if unit system constants don't exist
-    try:
-        from homeassistant.const import ENERGY_WATT_HOUR  # pyright: ignore[reportAttributeAccessIssue]
-        from homeassistant.const import POWER_WATT  # pyright: ignore[reportAttributeAccessIssue]
-        from homeassistant.const import TEMP_CELSIUS  # pyright: ignore[reportAttributeAccessIssue]
-
-        UNIT_CELSIUS = TEMP_CELSIUS
-        UNIT_WATT = POWER_WATT
-        UNIT_WATT_HOUR = ENERGY_WATT_HOUR
-    except ImportError:
-        # Final fallback for versions where these constants don't exist
-        UNIT_CELSIUS = "°C"  # pyright: ignore[reportAssignmentType]
-        UNIT_HUMIDITY = "%"  # pyright: ignore[reportAssignmentType]
-        UNIT_WATT = "W"  # pyright: ignore[reportAssignmentType]
-        UNIT_WATT_HOUR = "Wh"  # pyright: ignore[reportAssignmentType]
+from homeassistant.helpers.event import EventStateChangedData, async_track_state_change_event
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -55,6 +37,11 @@ from .const import (
     ICON_WINDOW_OPEN,
     STATE_ACTIVE,
 )
+
+UNIT_CELSIUS: str = UnitOfTemperature.CELSIUS
+UNIT_HUMIDITY: str = PERCENTAGE
+UNIT_WATT: str = UnitOfPower.WATT
+UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -160,11 +147,11 @@ class AreaSensorCoordinator:
                 entities_to_track,
             )
             listener = async_track_state_change_event(self.hass, entities_to_track, self._handle_state_change)
-            self._listeners.append(listener)  # pyright: ignore[reportArgumentType]
+            self._listeners.append(listener)
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
-    def _handle_state_change(self, event: Event) -> None:
+    def _handle_state_change(self, event: Event[EventStateChangedData]) -> None:
         """Handle state change events."""
         # Update all registered sensors
         for sensor in self._sensors:
@@ -227,7 +214,7 @@ class AreaSummarySensor(SensorEntity):
         return f"custom_area_{area_name}" if area_name else None
 
     @property
-    def state(self) -> str:
+    def native_value(self) -> str:
         """Return the state of the sensor."""
         data = self.config_entry.data
 
@@ -395,7 +382,7 @@ class PowerSensor(SensorEntity):
         return f"custom_area_{area_name}_power" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
         if power_entity:
@@ -403,7 +390,7 @@ class PowerSensor(SensorEntity):
         return None
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
         if power_entity:
@@ -439,7 +426,7 @@ class EnergySensor(SensorEntity):
         return f"custom_area_{area_name}_energy" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
         if energy_entity:
@@ -447,7 +434,7 @@ class EnergySensor(SensorEntity):
         return None
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
         if energy_entity:
@@ -483,7 +470,7 @@ class TemperatureSensor(SensorEntity):
         return f"custom_area_{area_name}_temperature" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
         if temp_entity:
@@ -491,7 +478,7 @@ class TemperatureSensor(SensorEntity):
         return None
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
         if temp_entity:
@@ -527,7 +514,7 @@ class HumiditySensor(SensorEntity):
         return f"custom_area_{area_name}_humidity" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
         if humidity_entity:
@@ -535,7 +522,7 @@ class HumiditySensor(SensorEntity):
         return None
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
         if humidity_entity:
@@ -571,7 +558,7 @@ class ClimateTargetSensor(SensorEntity):
         return f"custom_area_{area_name}_climate_target" if area_name else None
 
     @property
-    def state(self) -> Optional[float]:
+    def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
         climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
         if climate_entity:
@@ -584,7 +571,7 @@ class ClimateTargetSensor(SensorEntity):
         return None
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
         if climate_entity:

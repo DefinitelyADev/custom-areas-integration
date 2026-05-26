@@ -1,6 +1,5 @@
 """Test the Custom Areas Integration sensors."""
 
-import sys
 from unittest.mock import MagicMock
 
 import pytest
@@ -278,77 +277,6 @@ def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
     # Test window icon (takes precedence over motion)
     window_state.state = STATE_ON
     assert sensor.icon == "mdi:window-open-variant"
-
-
-def test_unit_constant_fallbacks(monkeypatch):
-    """Test unit constant import fallbacks work correctly."""
-    from custom_components.custom_areas import sensor
-
-    # Mock sys.modules to simulate missing modules
-    original_modules = dict(sys.modules)
-
-    # Remove the modules we want to test as missing
-    modules_to_remove = [
-        "homeassistant.util.unit_system",
-        "homeassistant.util.unit_conversion",
-        "homeassistant.const",
-    ]
-
-    for module in modules_to_remove:
-        sys.modules.pop(module, None)
-
-    try:
-        # Reload the module to test the import logic
-        import importlib
-
-        importlib.reload(sensor)
-
-        # Verify constants are set to expected fallback values
-        assert sensor.UNIT_CELSIUS == "°C"
-        assert sensor.UNIT_WATT == "W"
-        assert sensor.UNIT_WATT_HOUR == "Wh"
-
-    finally:
-        # Restore original modules
-        sys.modules.update(original_modules)
-
-
-def test_unit_constants_with_deprecated_fallback(monkeypatch):
-    """Test that deprecated constants are used when new ones fail."""
-    from custom_components.custom_areas import sensor
-
-    # Mock only the new unit system modules as missing
-    original_modules = dict(sys.modules)
-
-    modules_to_remove = [
-        "homeassistant.util.unit_system",
-        "homeassistant.util.unit_conversion",
-    ]
-
-    for module in modules_to_remove:
-        sys.modules.pop(module, None)
-
-    try:
-        # Reload to test fallback to deprecated constants
-        import importlib
-
-        importlib.reload(sensor)
-
-        # Should use deprecated constants (which will show deprecation
-        # warnings but work)
-        assert sensor.UNIT_CELSIUS is not None
-        assert sensor.UNIT_WATT is not None
-        assert sensor.UNIT_WATT_HOUR is not None
-
-        # The deprecated constants have the same string values as our fallbacks
-        # This is expected and correct behavior
-        assert sensor.UNIT_CELSIUS == "°C"
-        assert sensor.UNIT_WATT == "W"
-        assert sensor.UNIT_WATT_HOUR == "Wh"
-
-    finally:
-        # Restore original modules
-        sys.modules.update(original_modules)
 
 
 def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):

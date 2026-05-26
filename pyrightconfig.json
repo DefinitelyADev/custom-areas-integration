@@ -16,7 +16,7 @@
     "reportUnusedFunction": "warning",
     "reportUnusedVariable": "warning",
     "reportDuplicateImport": "warning",
-    "pythonVersion": "3.11",
+    "pythonVersion": "3.13",
     "include": [
         "custom_components/custom_areas"
     ],
