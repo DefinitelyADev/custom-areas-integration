@@ -239,12 +239,18 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     assert attrs["window_open"] is False
     assert attrs["climate_mode"] == "heat"
 
-    # Measurement attributes should now be present as strings with units
+    # Measurement attributes ship in both numeric and stringified-with-unit
+    # form per the documented contract (README.md, docs/api.md).
     assert attrs["power"] == "25.5 W"
+    assert attrs["power_w"] == 25.5
     assert attrs["energy"] == "150.0 Wh"
+    assert attrs["energy_wh"] == 150.0
     assert attrs["temperature"] == "22.3 °C"
+    assert attrs["temperature_c"] == 22.3
     assert attrs["humidity"] == "65.0 %"
+    assert attrs["humidity_pct"] == 65.0
     assert attrs["climate_target"] == "21.5 °C"
+    assert attrs["climate_target_c"] == 21.5
 
 
 def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass):
@@ -280,33 +286,62 @@ def test_area_summary_sensor_icon(mock_coordinator, mock_config_entry, mock_hass
 
 
 def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_entry, mock_hass):
-    """Test that summary sensor works correctly with simplified attributes."""
+    """Verify the documented dual-form contract on AreaSummarySensor.
+
+    Every numeric measurement ships as both a numeric attribute (e.g.
+    `power_w`) and a stringified-with-unit attribute (e.g. `power`).
+    See README.md and docs/api.md.
+    """
     sensor_instance = AreaSummarySensor(mock_coordinator, mock_config_entry)
     sensor_instance.hass = mock_hass
 
-    # Mock states - only binary sensors for summary sensor
     motion_state = MagicMock()
     motion_state.state = STATE_ON
+
+    power_state = MagicMock()
+    power_state.state = "42.0"
+    power_state.attributes = {"unit_of_measurement": "W"}
+
+    energy_state = MagicMock()
+    energy_state.state = "1000.0"
+    energy_state.attributes = {"unit_of_measurement": "Wh"}
+
+    temp_state = MagicMock()
+    temp_state.state = "20.0"
+    temp_state.attributes = {"unit_of_measurement": "°C"}
+
+    humidity_state = MagicMock()
+    humidity_state.state = "55.0"
+    humidity_state.attributes = {"unit_of_measurement": "%"}
 
     def mock_get(entity_id):
         if entity_id == "binary_sensor.motion":
             return motion_state
+        elif entity_id == "sensor.power":
+            return power_state
+        elif entity_id == "sensor.energy":
+            return energy_state
+        elif entity_id == "sensor.temperature":
+            return temp_state
+        elif entity_id == "sensor.humidity":
+            return humidity_state
         return None
 
     mock_hass.states.get = mock_get
 
-    # Test that only appropriate attributes are generated for summary sensor
     attrs = sensor_instance.extra_state_attributes
 
-    # Only binary sensor attributes should be present
+    # Binary sensor attribute
     assert attrs["occupied"] is True
 
-    # Numeric measurement attributes should no longer be in summary sensor
-    assert "power_w" not in attrs
-    assert "energy_wh" not in attrs
-    assert "temperature_c" not in attrs
+    # Numeric measurement attributes ARE present per the documented contract.
+    assert attrs["power_w"] == 42.0
+    assert attrs["energy_wh"] == 1000.0
+    assert attrs["temperature_c"] == 20.0
+    assert attrs["humidity_pct"] == 55.0
 
-    # Display attributes should no longer be in summary sensor
-    assert "power" not in attrs
-    assert "energy" not in attrs
-    assert "temperature" not in attrs
+    # Stringified-with-unit attributes are present alongside the numeric form.
+    assert attrs["power"] == "42.0 W"
+    assert attrs["energy"] == "1000.0 Wh"
+    assert attrs["temperature"] == "20.0 °C"
+    assert attrs["humidity"] == "55.0 %"
