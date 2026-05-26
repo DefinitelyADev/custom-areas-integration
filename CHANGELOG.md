@@ -5,6 +5,15 @@ All notable changes to the Rooms integration will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-27
+
+### Fixed
+- Restored dual-form numeric attributes (`power_w`, `energy_wh`, `temperature_c`, `humidity_pct`, `climate_target_c`) on `AreaSummarySensor` — regression from v1.2.0 that broke the documented contract.
+- Documented default icon now matches code behavior (`mdi:texture-box`).
+
+### Removed
+- Unused `ICON_HOME` constant.
+
 ## [1.2.2] - 2025-09-22
 
 ### Added
