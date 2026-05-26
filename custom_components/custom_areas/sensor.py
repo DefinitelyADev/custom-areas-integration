@@ -69,6 +69,18 @@ def get_numeric_state(hass: HomeAssistant, entity_id: str) -> Optional[float]:
     return None
 
 
+def _get_option(entry: ConfigEntry, key: str, default: Any = None) -> Any:
+    """Read a config value with options-take-precedence-over-data semantics.
+
+    `entry.options` is populated by the options flow when an existing entry
+    is reconfigured. Original entries have `entry.options == {}`, so they
+    transparently keep reading from `entry.data` — no migration needed.
+    """
+    if key in entry.options:
+        return entry.options[key]
+    return entry.data.get(key, default)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -81,27 +93,27 @@ async def async_setup_entry(
     entities: list[SensorEntity] = [summary_sensor]
 
     # Create measurement sensors conditionally
-    if config_entry.data.get(CONF_POWER_ENTITY):
+    if _get_option(config_entry, CONF_POWER_ENTITY):
         power_sensor = PowerSensor(coordinator, config_entry)
         entities.append(power_sensor)
         summary_sensor.power_sensor = power_sensor
 
-    if config_entry.data.get(CONF_ENERGY_ENTITY):
+    if _get_option(config_entry, CONF_ENERGY_ENTITY):
         energy_sensor = EnergySensor(coordinator, config_entry)
         entities.append(energy_sensor)
         summary_sensor.energy_sensor = energy_sensor
 
-    if config_entry.data.get(CONF_TEMP_ENTITY):
+    if _get_option(config_entry, CONF_TEMP_ENTITY):
         temperature_sensor = TemperatureSensor(coordinator, config_entry)
         entities.append(temperature_sensor)
         summary_sensor.temperature_sensor = temperature_sensor
 
-    if config_entry.data.get(CONF_HUMIDITY_ENTITY):
+    if _get_option(config_entry, CONF_HUMIDITY_ENTITY):
         humidity_sensor = HumiditySensor(coordinator, config_entry)
         entities.append(humidity_sensor)
         summary_sensor.humidity_sensor = humidity_sensor
 
-    if config_entry.data.get(CONF_CLIMATE_ENTITY):
+    if _get_option(config_entry, CONF_CLIMATE_ENTITY):
         climate_target_sensor = ClimateTargetSensor(coordinator, config_entry)
         entities.append(climate_target_sensor)
         summary_sensor.climate_target_sensor = climate_target_sensor
@@ -134,7 +146,7 @@ class AreaSensorCoordinator:
             CONF_WINDOW_ENTITY,
             CONF_CLIMATE_ENTITY,
         ]:
-            entity_id = self.config_entry.data.get(key)
+            entity_id = _get_option(self.config_entry, key)
             if entity_id:
                 entities_to_track.append(entity_id)
                 _LOGGER.debug("Will track entity: %s", entity_id)
@@ -176,7 +188,7 @@ class AreaSummarySensor(SensorEntity):
         self.coordinator = coordinator
         self.config_entry = config_entry
         # Display name (friendly): just the area name
-        self._attr_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        self._attr_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
@@ -193,7 +205,7 @@ class AreaSummarySensor(SensorEntity):
         # Set up device info
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -201,7 +213,7 @@ class AreaSummarySensor(SensorEntity):
     @property
     def name(self) -> str:
         """Return the name of the sensor (display name without area_ prefix)."""
-        area_name = self.config_entry.data.get(CONF_AREA_NAME, "")
+        area_name = _get_option(self.config_entry, CONF_AREA_NAME, "")
         return str(area_name) if area_name else ""
 
     @property
@@ -210,24 +222,22 @@ class AreaSummarySensor(SensorEntity):
 
         Home Assistant will slugify this into the final object_id.
         """
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}" if area_name else None
 
     @property
     def native_value(self) -> str:
         """Return the state of the sensor."""
-        data = self.config_entry.data
-
         # Check motion first
-        motion_entity = data.get(CONF_MOTION_ENTITY)
+        motion_entity = _get_option(self.config_entry, CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = self.hass.states.get(motion_entity)
             if motion_state and motion_state.state == STATE_ON:
                 return STATE_ACTIVE
 
         # Check power threshold
-        power_entity = data.get(CONF_POWER_ENTITY)
-        active_threshold = data.get(CONF_ACTIVE_THRESHOLD, DEFAULT_ACTIVE_THRESHOLD)
+        power_entity = _get_option(self.config_entry, CONF_POWER_ENTITY)
+        active_threshold = _get_option(self.config_entry, CONF_ACTIVE_THRESHOLD, DEFAULT_ACTIVE_THRESHOLD)
         if power_entity:
             power_state = self.hass.states.get(power_entity)
             if power_state:
@@ -240,13 +250,13 @@ class AreaSummarySensor(SensorEntity):
 
         # Check if any core entities exist
         core_entities = [
-            data.get(CONF_POWER_ENTITY),
-            data.get(CONF_ENERGY_ENTITY),
-            data.get(CONF_TEMP_ENTITY),
-            data.get(CONF_HUMIDITY_ENTITY),
-            data.get(CONF_MOTION_ENTITY),
-            data.get(CONF_WINDOW_ENTITY),
-            data.get(CONF_CLIMATE_ENTITY),
+            _get_option(self.config_entry, CONF_POWER_ENTITY),
+            _get_option(self.config_entry, CONF_ENERGY_ENTITY),
+            _get_option(self.config_entry, CONF_TEMP_ENTITY),
+            _get_option(self.config_entry, CONF_HUMIDITY_ENTITY),
+            _get_option(self.config_entry, CONF_MOTION_ENTITY),
+            _get_option(self.config_entry, CONF_WINDOW_ENTITY),
+            _get_option(self.config_entry, CONF_CLIMATE_ENTITY),
         ]
 
         if any(entity for entity in core_entities if entity):
@@ -257,31 +267,28 @@ class AreaSummarySensor(SensorEntity):
     @property
     def icon(self) -> str:
         """Return the icon."""
-        data = self.config_entry.data
-
         # Check window first
-        window_entity = data.get(CONF_WINDOW_ENTITY)
+        window_entity = _get_option(self.config_entry, CONF_WINDOW_ENTITY)
         if window_entity:
             window_state = self.hass.states.get(window_entity)
             if window_state and window_state.state == STATE_ON:
                 return ICON_WINDOW_OPEN
 
         # Check motion
-        motion_entity = data.get(CONF_MOTION_ENTITY)
+        motion_entity = _get_option(self.config_entry, CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = self.hass.states.get(motion_entity)
             if motion_state and motion_state.state == STATE_ON:
                 return ICON_MOTION
 
         # Return configured icon or default
-        icon_value = data.get(CONF_ICON, DEFAULT_ICON)
+        icon_value = _get_option(self.config_entry, CONF_ICON, DEFAULT_ICON)
         return str(icon_value) if icon_value is not None else DEFAULT_ICON
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         attrs: Dict[str, Any] = {}
-        data = self.config_entry.data
 
         # Cache state lookups for performance
         cached_states = {}
@@ -293,17 +300,17 @@ class AreaSummarySensor(SensorEntity):
             return cached_states[entity_id]
 
         # Binary sensor attributes (motion, window, climate mode)
-        motion_entity = data.get(CONF_MOTION_ENTITY)
+        motion_entity = _get_option(self.config_entry, CONF_MOTION_ENTITY)
         if motion_entity:
             motion_state = get_cached_state(motion_entity)
             attrs["occupied"] = motion_state.state == STATE_ON if motion_state else False
 
-        window_entity = data.get(CONF_WINDOW_ENTITY)
+        window_entity = _get_option(self.config_entry, CONF_WINDOW_ENTITY)
         if window_entity:
             window_state = get_cached_state(window_entity)
             attrs["window_open"] = window_state.state == STATE_ON if window_state else False
 
-        climate_entity = data.get(CONF_CLIMATE_ENTITY)
+        climate_entity = _get_option(self.config_entry, CONF_CLIMATE_ENTITY)
         if climate_entity:
             climate_state = get_cached_state(climate_entity)
             if climate_state:
@@ -313,7 +320,7 @@ class AreaSummarySensor(SensorEntity):
         # and stringified-with-unit form per the documented contract (README.md,
         # docs/api.md). Pair each numeric/string emission so the contract is
         # grep-able from a single block.
-        power_entity = data.get(CONF_POWER_ENTITY)
+        power_entity = _get_option(self.config_entry, CONF_POWER_ENTITY)
         if power_entity:
             power_value = get_numeric_state(self.hass, power_entity)
             if power_value is not None:
@@ -322,7 +329,7 @@ class AreaSummarySensor(SensorEntity):
                 attrs["power_w"] = power_value
                 attrs["power"] = f"{power_value} {unit}"
 
-        energy_entity = data.get(CONF_ENERGY_ENTITY)
+        energy_entity = _get_option(self.config_entry, CONF_ENERGY_ENTITY)
         if energy_entity:
             energy_value = get_numeric_state(self.hass, energy_entity)
             if energy_value is not None:
@@ -331,7 +338,7 @@ class AreaSummarySensor(SensorEntity):
                 attrs["energy_wh"] = energy_value
                 attrs["energy"] = f"{energy_value} {unit}"
 
-        temp_entity = data.get(CONF_TEMP_ENTITY)
+        temp_entity = _get_option(self.config_entry, CONF_TEMP_ENTITY)
         if temp_entity:
             temp_value = get_numeric_state(self.hass, temp_entity)
             if temp_value is not None:
@@ -340,7 +347,7 @@ class AreaSummarySensor(SensorEntity):
                 attrs["temperature_c"] = temp_value
                 attrs["temperature"] = f"{temp_value} {unit}"
 
-        humidity_entity = data.get(CONF_HUMIDITY_ENTITY)
+        humidity_entity = _get_option(self.config_entry, CONF_HUMIDITY_ENTITY)
         if humidity_entity:
             humidity_value = get_numeric_state(self.hass, humidity_entity)
             if humidity_value is not None:
@@ -349,7 +356,7 @@ class AreaSummarySensor(SensorEntity):
                 attrs["humidity_pct"] = humidity_value
                 attrs["humidity"] = f"{humidity_value} {unit}"
 
-        climate_entity = data.get(CONF_CLIMATE_ENTITY)
+        climate_entity = _get_option(self.config_entry, CONF_CLIMATE_ENTITY)
         if climate_entity:
             climate_state = self.hass.states.get(climate_entity)
             if climate_state and climate_state.attributes.get("temperature"):
@@ -371,13 +378,13 @@ class PowerSensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        area_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_name = f"{area_name} Power"
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_power"
         self._attr_should_poll = False
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -386,13 +393,13 @@ class PowerSensor(SensorEntity):
     @property
     def suggested_object_id(self) -> Optional[str]:
         """Suggest object_id."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_power" if area_name else None
 
     @property
     def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
-        power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
+        power_entity = _get_option(self.config_entry, CONF_POWER_ENTITY)
         if power_entity:
             return get_numeric_state(self.hass, power_entity)
         return None
@@ -400,7 +407,7 @@ class PowerSensor(SensorEntity):
     @property
     def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
-        power_entity = self.config_entry.data.get(CONF_POWER_ENTITY)
+        power_entity = _get_option(self.config_entry, CONF_POWER_ENTITY)
         if power_entity:
             state = self.hass.states.get(power_entity)
             if state and state.attributes.get("unit_of_measurement"):
@@ -415,13 +422,13 @@ class EnergySensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        area_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_name = f"{area_name} Energy"
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_energy"
         self._attr_should_poll = False
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -430,13 +437,13 @@ class EnergySensor(SensorEntity):
     @property
     def suggested_object_id(self) -> Optional[str]:
         """Suggest object_id."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_energy" if area_name else None
 
     @property
     def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
-        energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
+        energy_entity = _get_option(self.config_entry, CONF_ENERGY_ENTITY)
         if energy_entity:
             return get_numeric_state(self.hass, energy_entity)
         return None
@@ -444,7 +451,7 @@ class EnergySensor(SensorEntity):
     @property
     def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
-        energy_entity = self.config_entry.data.get(CONF_ENERGY_ENTITY)
+        energy_entity = _get_option(self.config_entry, CONF_ENERGY_ENTITY)
         if energy_entity:
             state = self.hass.states.get(energy_entity)
             if state and state.attributes.get("unit_of_measurement"):
@@ -459,13 +466,13 @@ class TemperatureSensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        area_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_name = f"{area_name} Temperature"
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_temperature"
         self._attr_should_poll = False
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -474,13 +481,13 @@ class TemperatureSensor(SensorEntity):
     @property
     def suggested_object_id(self) -> Optional[str]:
         """Suggest object_id."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_temperature" if area_name else None
 
     @property
     def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
-        temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
+        temp_entity = _get_option(self.config_entry, CONF_TEMP_ENTITY)
         if temp_entity:
             return get_numeric_state(self.hass, temp_entity)
         return None
@@ -488,7 +495,7 @@ class TemperatureSensor(SensorEntity):
     @property
     def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
-        temp_entity = self.config_entry.data.get(CONF_TEMP_ENTITY)
+        temp_entity = _get_option(self.config_entry, CONF_TEMP_ENTITY)
         if temp_entity:
             state = self.hass.states.get(temp_entity)
             if state and state.attributes.get("unit_of_measurement"):
@@ -503,13 +510,13 @@ class HumiditySensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        area_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_name = f"{area_name} Humidity"
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_humidity"
         self._attr_should_poll = False
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -518,13 +525,13 @@ class HumiditySensor(SensorEntity):
     @property
     def suggested_object_id(self) -> Optional[str]:
         """Suggest object_id."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_humidity" if area_name else None
 
     @property
     def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
-        humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
+        humidity_entity = _get_option(self.config_entry, CONF_HUMIDITY_ENTITY)
         if humidity_entity:
             return get_numeric_state(self.hass, humidity_entity)
         return None
@@ -532,7 +539,7 @@ class HumiditySensor(SensorEntity):
     @property
     def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
-        humidity_entity = self.config_entry.data.get(CONF_HUMIDITY_ENTITY)
+        humidity_entity = _get_option(self.config_entry, CONF_HUMIDITY_ENTITY)
         if humidity_entity:
             state = self.hass.states.get(humidity_entity)
             if state and state.attributes.get("unit_of_measurement"):
@@ -547,13 +554,13 @@ class ClimateTargetSensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        area_name = str(config_entry.data.get(CONF_AREA_NAME, ""))
+        area_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
         self._attr_name = f"{area_name} Climate Target"
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_climate_target"
         self._attr_should_poll = False
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, config_entry.entry_id)},
-            name=f"Area: {config_entry.data[CONF_AREA_NAME]}",
+            name=f"Area: {_get_option(config_entry, CONF_AREA_NAME)}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -562,13 +569,13 @@ class ClimateTargetSensor(SensorEntity):
     @property
     def suggested_object_id(self) -> Optional[str]:
         """Suggest object_id."""
-        area_name = str(self.config_entry.data.get(CONF_AREA_NAME, "")).strip()
+        area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_climate_target" if area_name else None
 
     @property
     def native_value(self) -> Optional[float]:
         """Return the state of the sensor."""
-        climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
+        climate_entity = _get_option(self.config_entry, CONF_CLIMATE_ENTITY)
         if climate_entity:
             climate_state = self.hass.states.get(climate_entity)
             if climate_state and climate_state.attributes.get("temperature"):
@@ -581,7 +588,7 @@ class ClimateTargetSensor(SensorEntity):
     @property
     def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
-        climate_entity = self.config_entry.data.get(CONF_CLIMATE_ENTITY)
+        climate_entity = _get_option(self.config_entry, CONF_CLIMATE_ENTITY)
         if climate_entity:
             state = self.hass.states.get(climate_entity)
             if state and state.attributes.get("unit_of_measurement"):

@@ -32,7 +32,12 @@ from custom_components.custom_areas.sensor import (
 
 @pytest.fixture
 def mock_config_entry():
-    """Mock config entry."""
+    """Mock config entry.
+
+    `entry.options` is set to `{}` so `sensor._get_option`'s options-take-
+    precedence helper walks through to `entry.data`. Older HA versions
+    don't expose `options` on `ConfigEntry`'s class-level spec.
+    """
     entry = MagicMock(spec=ConfigEntry)
     entry.entry_id = "test_entry_id"
     entry.data = {
@@ -46,6 +51,7 @@ def mock_config_entry():
         CONF_CLIMATE_ENTITY: "climate.thermostat",
         CONF_ACTIVE_THRESHOLD: 50.0,
     }
+    entry.options = {}
     return entry
 
 

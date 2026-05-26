@@ -99,7 +99,12 @@ SENSOR_IDS = list(EXPECTED_SENSOR_SURFACE.keys())
 
 @pytest.fixture
 def mock_config_entry():
-    """Mock config entry covering all five measurement sources."""
+    """Mock config entry covering all five measurement sources.
+
+    `entry.options` is set to `{}` so the options-take-precedence helper in
+    `sensor._get_option` walks through to `entry.data`. Older HA versions
+    don't expose `options` on `ConfigEntry`'s class-level spec.
+    """
     entry = MagicMock(spec=ConfigEntry)
     entry.entry_id = "test_entry_id"
     entry.data = {
@@ -110,6 +115,7 @@ def mock_config_entry():
         CONF_HUMIDITY_ENTITY: "sensor.humidity",
         CONF_CLIMATE_ENTITY: "climate.thermostat",
     }
+    entry.options = {}
     return entry
 
 
