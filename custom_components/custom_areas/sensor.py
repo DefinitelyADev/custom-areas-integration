@@ -17,7 +17,7 @@ from homeassistant.const import (
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import EventStateChangedData, async_track_state_change_event
+from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -151,7 +151,7 @@ class AreaSensorCoordinator:
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
-    def _handle_state_change(self, event: Event[EventStateChangedData]) -> None:
+    def _handle_state_change(self, _event: Event) -> None:
         """Handle state change events."""
         # Update all registered sensors
         for sensor in self._sensors:
