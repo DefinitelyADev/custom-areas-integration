@@ -53,7 +53,7 @@ custom_components/custom_areas/
 ## Development Setup
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.13+
 - Home Assistant development environment
 - Git
 

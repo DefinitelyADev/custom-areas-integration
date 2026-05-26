@@ -38,7 +38,7 @@ The integration consists of:
 ## 🔧 Development
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.13+
 - Home Assistant development environment
 - Git
 
