@@ -8,7 +8,7 @@ A custom integration for Home Assistant that creates composite "Area" sensors wi
 [![HACS](https://img.shields.io/badge/HACS-Custom%20Areas-blue.svg)](https://github.com/hacs/integration)
 [![codecov](https://codecov.io/gh/DefinitelyADev/custom-areas-integration/branch/master/graph/badge.svg)](https://codecov.io/gh/DefinitelyADev/custom-areas-integration)
 [![Release](https://img.shields.io/github/v/release/DefinitelyADev/custom-areas-integration?sort=semver)](https://github.com/DefinitelyADev/custom-areas-integration/releases)
-![Python Versions](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Python Versions](https://img.shields.io/badge/python-3.13+-blue.svg)
 ![GitHub License](https://img.shields.io/github/license/DefinitelyADev/custom-areas-integration)
 
 ## Features
@@ -127,8 +127,8 @@ Each area creates a device in Home Assistant's device registry, allowing you to:
 
 ## Requirements
 
-- Home Assistant 2024.1.0 or later
-- Python 3.10 or later
+- Home Assistant 2024.4.0 or later
+- Python 3.13 or later
 - Entities must exist before configuring the area
 
 ## Troubleshooting
@@ -163,7 +163,7 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ### Automated Checks
 
-- **Tests**: Run on Python 3.10, 3.11, and 3.12
+- **Tests**: Run on Python 3.13
 - **Validation**: Custom validation of manifest, translations, and structure
 - **Type Checking**: Pyright type checking
 - **Linting**: Black formatting, isort import sorting, and flake8 linting

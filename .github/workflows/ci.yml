@@ -17,8 +17,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        include:
+          # HA 2024.x — pinned to py3.12 (HA didn't ship py3.13 wheels until
+          # 2024.12). josepy<2 keeps the `acme` lib HA 2024.7 pins from
+          # breaking on the josepy symbol removed in 2.x.
+          - python-version: "3.12"
+            ha-version: "2024"
+            phacc-pin: "pytest-homeassistant-custom-component==0.13.145"
+            extra-pins: "josepy<2"
+          # HA 2025.x — pycares<5 keeps aiodns 3.5 (which HA 2025.12 ships)
+          # from breaking on the symbol removed in pycares 5.x.
+          - python-version: "3.13"
+            ha-version: "2025"
+            phacc-pin: "pytest-homeassistant-custom-component==0.13.298"
+            extra-pins: "pycares<5"
+          # HA 2026.x — highest phacc compatible with Python 3.13.
+          - python-version: "3.13"
+            ha-version: "2026"
+            phacc-pin: "pytest-homeassistant-custom-component==0.13.316"
+            extra-pins: ""
+    name: test (py${{ matrix.python-version }}, HA ${{ matrix.ha-version }})
     steps:
     - uses: actions/checkout@v6
 
@@ -27,17 +47,32 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install test dependencies
+      # phacc pins pytest-asyncio transitively, so we don't list it here —
+      # listing requirements-dev.txt's >=1.3.0 floor would conflict with the
+      # py3.12/HA 2024 cell, which phacc ties to pytest-asyncio 0.23.x.
+      # Specs are written to a requirements file so bash doesn't parse `<` in
+      # version specifiers (e.g. `josepy<2`) as input redirection.
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
+        cat > /tmp/cell-requirements.txt <<'EOF'
+        pytest
+        pytest-cov
+        voluptuous
+        ${{ matrix.phacc-pin }}
+        ${{ matrix.extra-pins }}
+        EOF
+        pip install -r /tmp/cell-requirements.txt
+
+    - name: Show resolved HA version
+      run: python -c "from homeassistant.const import __version__; print('HA', __version__)"
 
     - name: Run tests
       run: |
         python run_tests.py
 
     - name: Upload coverage to Codecov
-      if: matrix.python-version == '3.12'
+      if: matrix.ha-version == '2026'
       uses: codecov/codecov-action@v5
       with:
         files: ./coverage.xml
@@ -52,7 +87,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.11"
+        python-version: "3.13"
 
     - name: Install dependencies
       run: |
@@ -71,7 +106,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.11"
+        python-version: "3.13"
 
     - name: Install dependencies
       run: |
@@ -131,7 +166,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.11"
+        python-version: "3.13"
 
     - name: Install dependencies
       run: |
