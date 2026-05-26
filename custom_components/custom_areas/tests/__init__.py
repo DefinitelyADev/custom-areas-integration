@@ -1,1 +1,1 @@
-"""Tests for Rooms integration."""
+"""Tests for Custom Areas integration."""
