@@ -181,8 +181,12 @@ class AreaSensorCoordinator:
         """Register a sensor."""
         self._sensors.append(sensor)
 
-    def async_shutdown(self):
-        """Clean up listeners."""
+    def shutdown(self):
+        """Clean up listeners.
+
+        Synchronous despite the surrounding HA `async_*` convention — this
+        method only calls listener-removal callbacks, no awaitables.
+        """
         for listener in self._listeners:
             listener()
 

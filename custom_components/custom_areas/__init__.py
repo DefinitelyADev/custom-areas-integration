@@ -59,7 +59,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
-        coordinator.async_shutdown()
+        coordinator.shutdown()
 
     return unload_ok
 
