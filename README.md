@@ -166,8 +166,9 @@ This project uses GitHub Actions for continuous integration and deployment:
 - **Tests**: Run on Python 3.13
 - **Validation**: Custom validation of manifest, translations, and structure
 - **Type Checking**: Pyright type checking
-- **Linting**: Black formatting, isort import sorting, and flake8 linting
+- **Linting**: Black formatting, isort import sorting, flake8 linting, and ruff checks
 - **HACS Validation**: Ensures compatibility with HACS
+- **Hassfest**: Home Assistant's canonical integration validator
 - **Pre-commit**: Code quality checks on pull requests
 
 ### Workflows

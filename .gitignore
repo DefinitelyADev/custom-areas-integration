@@ -124,11 +124,5 @@ dmypy.json
 .DS_Store
 Thumbs.db
 
-# Home Assistant specific
-custom_components/rooms/__pycache__/
-custom_components/rooms/*.pyc
-custom_components/rooms/*.pyo
-custom_components/rooms/*.pyd
-
 # Logs
 *.log

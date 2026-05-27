@@ -1,5 +1,5 @@
-site_name: Rooms Integration Documentation
-site_description: Documentation for the Rooms custom integration for Home Assistant
+site_name: Custom Areas Integration Documentation
+site_description: Documentation for the Custom Areas custom integration for Home Assistant
 site_author: Tsakiridis Ilias
 site_url: https://DefinitelyADev.github.io/room-entity
 
