@@ -8,6 +8,11 @@ config flow actually integrates with HA's flow manager (set_unique_id,
 abort-on-duplicate, schema validation).
 """
 
+# HA's FlowResult is a TypedDict where most keys are NotRequired. pyright flags
+# direct subscript access as unsafe; HA core's own tests rely on the same access
+# pattern and suppress this report file-wide.
+# pyright: reportTypedDictNotRequiredAccess=false
+
 import pytest
 import voluptuous as vol
 from homeassistant.config_entries import SOURCE_USER
