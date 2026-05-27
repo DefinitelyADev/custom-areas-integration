@@ -15,6 +15,7 @@ from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.custom_areas.const import CONF_AREA_NAME, CONF_MOTION_ENTITY, CONF_POWER_ENTITY, DOMAIN
+from custom_components.custom_areas.tests._helpers import enable_custom_integrations
 
 
 def _make_entry(area_name: str = "Living Room") -> MockConfigEntry:
@@ -31,8 +32,9 @@ def _make_entry(area_name: str = "Living Room") -> MockConfigEntry:
     )
 
 
-async def test_async_setup_entry_happy_path(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_async_setup_entry_happy_path(hass: HomeAssistant) -> None:
     """A valid entry sets up, stores the coordinator, and creates a device."""
+    enable_custom_integrations(hass)
     entry = _make_entry()
     entry.add_to_hass(hass)
 
@@ -53,15 +55,14 @@ async def test_async_setup_entry_happy_path(hass: HomeAssistant, enable_custom_i
     assert device.manufacturer == "Areas Integration"
 
 
-async def test_async_setup_entry_reraises_as_config_entry_not_ready(
-    hass: HomeAssistant, enable_custom_integrations
-) -> None:
+async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAssistant) -> None:
     """When the coordinator's first refresh raises, setup must re-raise ConfigEntryNotReady.
 
     ``__init__.py`` deliberately catches the broad ``Exception``, logs, and
     re-raises as ``ConfigEntryNotReady`` so HA can retry setup on a backoff.
     AGENTS.md / CLAUDE.md both call this out as load-bearing.
     """
+    enable_custom_integrations(hass)
     entry = _make_entry("Bedroom")
     entry.add_to_hass(hass)
 
@@ -75,8 +76,9 @@ async def test_async_setup_entry_reraises_as_config_entry_not_ready(
             await async_setup_entry(hass, entry)
 
 
-async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant) -> None:
     """Unload removes the coordinator from hass.data and calls shutdown."""
+    enable_custom_integrations(hass)
     entry = _make_entry("Kitchen")
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id) is True
@@ -92,8 +94,9 @@ async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant
     assert shutdown_spy.call_count == 1
 
 
-async def test_async_reload_entry_replaces_coordinator(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_async_reload_entry_replaces_coordinator(hass: HomeAssistant) -> None:
     """Reloading the entry unloads then re-sets-up, producing a fresh coordinator."""
+    enable_custom_integrations(hass)
     entry = _make_entry("Office")
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id) is True
