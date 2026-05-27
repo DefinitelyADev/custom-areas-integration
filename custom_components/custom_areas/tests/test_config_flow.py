@@ -35,6 +35,14 @@ from custom_components.custom_areas.const import (
 )
 from custom_components.custom_areas.tests._helpers import enable_custom_integrations
 
+# Explicit asyncio marker for the whole module. pytest.ini sets
+# `asyncio_mode = auto` which is supposed to auto-mark `async def` tests, but
+# the pytest-asyncio 1.x cells (HA 2025/2026 in CI) don't honor it for this
+# repo's section layout, leaving the tests treated as sync depending on the
+# async `hass` fixture (which pytest 9 will outright reject). Marking the
+# module explicitly works in every supported pytest-asyncio version.
+pytestmark = pytest.mark.asyncio
+
 
 async def test_user_flow_happy_path(hass: HomeAssistant) -> None:
     """Submitting a valid form creates a ConfigEntry with the expected title and data."""
