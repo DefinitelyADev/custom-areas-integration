@@ -11,11 +11,11 @@
     "reportMissingParameterType": "none",
     "reportMissingTypeArgument": "none",
     "reportImportCycles": "none",
-    "reportUnusedImport": "warning",
-    "reportUnusedClass": "warning",
-    "reportUnusedFunction": "warning",
-    "reportUnusedVariable": "warning",
-    "reportDuplicateImport": "warning",
+    "reportUnusedImport": "error",
+    "reportUnusedClass": "error",
+    "reportUnusedFunction": "error",
+    "reportUnusedVariable": "error",
+    "reportDuplicateImport": "error",
     "pythonVersion": "3.13",
     "include": [
         "custom_components/custom_areas"

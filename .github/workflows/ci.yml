@@ -140,13 +140,23 @@ jobs:
       uses: home-assistant/actions/hassfest@master
 
   release:
-    needs: [test, validate, type-check, lint, hacs-validation]
+    needs: [test, validate, type-check, lint, hacs-validation, hassfest]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     permissions:
       contents: write
     steps:
     - uses: actions/checkout@v6
+
+    - name: Verify manifest version matches tag
+      run: |
+        manifest_version=$(jq -r .version custom_components/custom_areas/manifest.json)
+        tag_version="${{ github.ref_name }}"
+        tag_version="${tag_version#v}"
+        if [ "$manifest_version" != "$tag_version" ]; then
+          echo "::error::manifest.json version ($manifest_version) does not match tag ($tag_version)"
+          exit 1
+        fi
 
     - name: Create Release
       uses: softprops/action-gh-release@v2

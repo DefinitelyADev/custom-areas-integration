@@ -27,9 +27,3 @@ jobs:
     - name: Run pre-commit
       run: |
         pre-commit run --all-files --show-diff-on-failure
-
-    - name: Run pre-commit (push only)
-      if: github.event_name == 'push'
-      run: |
-        pre-commit install
-        pre-commit run --all-files
