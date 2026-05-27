@@ -1,6 +1,5 @@
 """Config flow for Custom Areas Integration."""
 
-import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import voluptuous as vol
@@ -32,8 +31,6 @@ from .const import (
     DEFAULT_ICON,
     DOMAIN,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
