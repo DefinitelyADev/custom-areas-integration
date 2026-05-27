@@ -28,6 +28,7 @@ from .const import (
     CONF_POWER_ENTITY,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
+    DEFAULT_ACTIVE_THRESHOLD,
     DEFAULT_ICON,
     DOMAIN,
 )
@@ -94,7 +95,9 @@ class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_CLIMATE_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain="climate")
                     ),
-                    vol.Optional(CONF_ACTIVE_THRESHOLD): vol.All(vol.Coerce(float), vol.Range(min=0)),
+                    vol.Optional(CONF_ACTIVE_THRESHOLD, default=DEFAULT_ACTIVE_THRESHOLD): vol.All(
+                        vol.Coerce(float), vol.Range(min=0)
+                    ),
                 }
             ),
             errors=errors,
