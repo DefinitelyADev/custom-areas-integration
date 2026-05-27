@@ -74,17 +74,15 @@ async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAs
 
 
 async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant) -> None:
-    """Unload removes the coordinator from hass.data and calls async_shutdown."""
+    """Unload removes the coordinator from hass.data and calls shutdown."""
     entry = _make_entry("Kitchen")
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id) is True
     await hass.async_block_till_done()
 
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    # Spy on the shutdown method without changing its behaviour. The method
-    # name is async_shutdown on Phase 1's branch; Phase 3 may rename to
-    # `shutdown`.
-    with patch.object(coordinator, "async_shutdown", wraps=coordinator.async_shutdown) as shutdown_spy:
+    # Spy on the shutdown method without changing its behaviour.
+    with patch.object(coordinator, "shutdown", wraps=coordinator.shutdown) as shutdown_spy:
         assert await hass.config_entries.async_unload(entry.entry_id) is True
         await hass.async_block_till_done()
 
