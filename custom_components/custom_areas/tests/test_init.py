@@ -53,7 +53,9 @@ async def test_async_setup_entry_happy_path(hass: HomeAssistant, enable_custom_i
     assert device.manufacturer == "Areas Integration"
 
 
-async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAssistant, enable_custom_integrations) -> None:
+async def test_async_setup_entry_reraises_as_config_entry_not_ready(
+    hass: HomeAssistant, enable_custom_integrations
+) -> None:
     """When the coordinator's first refresh raises, setup must re-raise ConfigEntryNotReady.
 
     ``__init__.py`` deliberately catches the broad ``Exception``, logs, and
