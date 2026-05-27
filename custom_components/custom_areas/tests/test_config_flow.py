@@ -30,6 +30,7 @@ from custom_components.custom_areas.const import (
     CONF_POWER_ENTITY,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
+    DEFAULT_ACTIVE_THRESHOLD,
     DEFAULT_ICON,
     DOMAIN,
 )
@@ -78,7 +79,7 @@ async def test_user_flow_duplicate_area_name_aborts(hass: HomeAssistant) -> None
 
 
 async def test_user_flow_optional_fields_omitted(hass: HomeAssistant) -> None:
-    """Only area_name supplied — entry is created and optional refs are absent from data."""
+    """Only area_name supplied — entity refs absent, defaulted scalars materialized."""
     enable_custom_integrations(hass)
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
@@ -92,7 +93,8 @@ async def test_user_flow_optional_fields_omitted(hass: HomeAssistant) -> None:
     data = result["data"]
     assert data[CONF_AREA_NAME] == "Bedroom"
 
-    # Optional entity references should not be present when omitted.
+    # Optional entity references should not be present when omitted (no defaults
+    # for these — they are entity selectors, no sensible default).
     for key in (
         CONF_POWER_ENTITY,
         CONF_ENERGY_ENTITY,
@@ -101,9 +103,13 @@ async def test_user_flow_optional_fields_omitted(hass: HomeAssistant) -> None:
         CONF_MOTION_ENTITY,
         CONF_WINDOW_ENTITY,
         CONF_CLIMATE_ENTITY,
-        CONF_ACTIVE_THRESHOLD,
     ):
         assert key not in data, f"Unexpected optional key {key!r} in entry.data"
+
+    # active_threshold has `default=DEFAULT_ACTIVE_THRESHOLD` in the schema
+    # (config_flow.py L6 — materialize the default at config time, not at
+    # runtime), so when the user omits it the default lands in entry.data.
+    assert data[CONF_ACTIVE_THRESHOLD] == DEFAULT_ACTIVE_THRESHOLD
 
 
 async def test_user_flow_icon_default_applied(hass: HomeAssistant) -> None:
