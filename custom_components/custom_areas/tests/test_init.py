@@ -17,13 +17,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.custom_areas.const import CONF_AREA_NAME, CONF_MOTION_ENTITY, CONF_POWER_ENTITY, DOMAIN
 from custom_components.custom_areas.tests._helpers import enable_custom_integrations
 
-# See test_config_flow.py for rationale. Explicit asyncio marker covers both
-# pytest-asyncio 0.23.x (HA 2024 cell) and 1.x (HA 2025/2026 cells); the
-# `asyncio_mode = auto` in pytest.ini turns out not to be honored in this
-# repo's config layout under 1.x, leaving these `async def` tests treated as
-# sync at collection time.
-pytestmark = pytest.mark.asyncio
-
 
 def _make_entry(area_name: str = "Living Room") -> MockConfigEntry:
     """Build a MockConfigEntry with a stable shape used across these tests."""
