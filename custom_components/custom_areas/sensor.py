@@ -166,7 +166,7 @@ class AreaSensorCoordinator:
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
-    def _handle_state_change(self, _event: Event) -> None:
+    def _handle_state_change(self, _: Event) -> None:
         """Handle state change events."""
         # Update all registered sensors
         for sensor in self._sensors:
