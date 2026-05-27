@@ -26,6 +26,7 @@ from custom_components.custom_areas.const import (
     CONF_POWER_ENTITY,
     CONF_TEMP_ENTITY,
     CONF_WINDOW_ENTITY,
+    DEFAULT_ICON,
     STATE_ACTIVE,
 )
 from custom_components.custom_areas.sensor import AreaMeasurementSensor, AreaSensorCoordinator, AreaSummarySensor
@@ -392,3 +393,103 @@ def test_sensor_functionality_with_fallback_units(mock_coordinator, mock_config_
     assert attrs["energy"] == "1000.0 Wh"
     assert attrs["temperature"] == "20.0 °C"
     assert attrs["humidity"] == "55.0 %"
+
+
+def test_coordinator_listener_cleanup(mock_coordinator):
+    """`shutdown` invokes every registered removal callback.
+
+    The coordinator stores listener removal callables in ``self._listeners``
+    (typically the return value of ``async_track_state_change_event``).
+    On shutdown each one must be called exactly once so HA stops dispatching
+    state-change events into a torn-down config entry.
+    """
+    removal_cb_1 = MagicMock()
+    removal_cb_2 = MagicMock()
+    mock_coordinator._listeners.append(removal_cb_1)
+    mock_coordinator._listeners.append(removal_cb_2)
+
+    mock_coordinator.shutdown()
+
+    removal_cb_1.assert_called_once_with()
+    removal_cb_2.assert_called_once_with()
+
+
+def test_icon_priority_window_over_motion(mock_coordinator, mock_config_entry, mock_hass):
+    """Window-open beats motion-on in the icon priority order."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    motion_state = MagicMock()
+    motion_state.state = STATE_ON
+    window_state = MagicMock()
+    window_state.state = STATE_ON
+
+    def mock_get(entity_id):
+        if entity_id == "binary_sensor.motion":
+            return motion_state
+        if entity_id == "binary_sensor.window":
+            return window_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.icon == "mdi:window-open-variant"
+
+
+def test_icon_priority_motion_when_no_window(mock_coordinator, mock_config_entry, mock_hass):
+    """Motion-on shows the motion icon when no window is open."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    motion_state = MagicMock()
+    motion_state.state = STATE_ON
+    window_state = MagicMock()
+    window_state.state = STATE_OFF
+
+    def mock_get(entity_id):
+        if entity_id == "binary_sensor.motion":
+            return motion_state
+        if entity_id == "binary_sensor.window":
+            return window_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.icon == "mdi:motion-sensor"
+
+
+def test_icon_default_when_idle(mock_coordinator, mock_config_entry, mock_hass):
+    """With motion off and window closed, the icon falls back to DEFAULT_ICON."""
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+
+    motion_state = MagicMock()
+    motion_state.state = STATE_OFF
+    window_state = MagicMock()
+    window_state.state = STATE_OFF
+
+    def mock_get(entity_id):
+        if entity_id == "binary_sensor.motion":
+            return motion_state
+        if entity_id == "binary_sensor.window":
+            return window_state
+        return None
+
+    mock_hass.states.get = mock_get
+
+    assert sensor.icon == DEFAULT_ICON
+    assert DEFAULT_ICON == "mdi:texture-box"
+
+
+def test_icon_default_when_neither_configured(mock_coordinator, mock_config_entry, mock_hass):
+    """With no motion/window entity in entry data, the icon is DEFAULT_ICON.
+
+    Guards against a regression where the icon priority code reads from a
+    state-dict for an entity that was never configured.
+    """
+    mock_config_entry.data = {CONF_AREA_NAME: "Test Area"}
+    sensor = AreaSummarySensor(mock_coordinator, mock_config_entry)
+    sensor.hass = mock_hass
+    mock_hass.states.get = MagicMock(return_value=None)
+
+    assert sensor.icon == DEFAULT_ICON
