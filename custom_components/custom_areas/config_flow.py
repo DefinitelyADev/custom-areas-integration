@@ -1,13 +1,21 @@
 """Config flow for Custom Areas Integration."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import selector
 from homeassistant.util import slugify
+
+if TYPE_CHECKING:
+    # `ConfigFlowResult` only exists on newer HA versions. The CI matrix
+    # spans HA 2024/2025/2026; the locally-installed phacc-pinned HA used
+    # for type-checking may not expose it. Pull it in under TYPE_CHECKING
+    # only and use the string forward reference in signatures. The suppress
+    # below is needed because pyright still evaluates TYPE_CHECKING blocks.
+    from homeassistant.config_entries import ConfigFlowResult  # pyright: ignore[reportAttributeAccessIssue]
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -42,7 +50,7 @@ class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Return the options flow handler for an existing entry."""
         return AreasOptionsFlowHandler(config_entry)
 
-    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None) -> "ConfigFlowResult":
         """Handle the initial step."""
         errors: Dict[str, str] = {}
 
@@ -111,7 +119,7 @@ class AreasOptionsFlowHandler(config_entries.OptionsFlow):
         """Capture the entry being reconfigured."""
         self.config_entry = config_entry
 
-    async def async_step_init(self, user_input: Optional[Dict[str, Any]] = None) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: Optional[Dict[str, Any]] = None) -> "ConfigFlowResult":
         """Show the options form, then save into `entry.options`."""
         if user_input is not None:
             # Ensure icon has a default value if not provided
