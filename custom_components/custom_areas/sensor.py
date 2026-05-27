@@ -39,11 +39,6 @@ from .const import (
     STATE_ACTIVE,
 )
 
-UNIT_CELSIUS: str = UnitOfTemperature.CELSIUS
-UNIT_HUMIDITY: str = PERCENTAGE
-UNIT_WATT: str = UnitOfPower.WATT
-UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -98,15 +93,15 @@ async def async_setup_entry(
     #  summary_attr) where summary_attr is the AreaSummarySensor attribute
     # name kept for backward compatibility.
     measurement_specs = (
-        (CONF_POWER_ENTITY, "power", "Power", UNIT_WATT, None, "power_sensor"),
-        (CONF_ENERGY_ENTITY, "energy", "Energy", UNIT_WATT_HOUR, None, "energy_sensor"),
-        (CONF_TEMP_ENTITY, "temperature", "Temperature", UNIT_CELSIUS, None, "temperature_sensor"),
-        (CONF_HUMIDITY_ENTITY, "humidity", "Humidity", UNIT_HUMIDITY, None, "humidity_sensor"),
+        (CONF_POWER_ENTITY, "power", "Power", UnitOfPower.WATT, None, "power_sensor"),
+        (CONF_ENERGY_ENTITY, "energy", "Energy", UnitOfEnergy.WATT_HOUR, None, "energy_sensor"),
+        (CONF_TEMP_ENTITY, "temperature", "Temperature", UnitOfTemperature.CELSIUS, None, "temperature_sensor"),
+        (CONF_HUMIDITY_ENTITY, "humidity", "Humidity", PERCENTAGE, None, "humidity_sensor"),
         (
             CONF_CLIMATE_ENTITY,
             "climate_target",
             "Climate Target",
-            UNIT_CELSIUS,
+            UnitOfTemperature.CELSIUS,
             "temperature",
             "climate_target_sensor",
         ),
@@ -331,7 +326,7 @@ class AreaSummarySensor(SensorEntity):
             power_value = get_numeric_state(self.hass, power_entity)
             if power_value is not None:
                 power_state = self.hass.states.get(power_entity)
-                unit = power_state.attributes.get("unit_of_measurement") if power_state else UNIT_WATT
+                unit = power_state.attributes.get("unit_of_measurement") if power_state else UnitOfPower.WATT
                 attrs["power_w"] = power_value
                 attrs["power"] = f"{power_value} {unit}"
 
@@ -340,7 +335,7 @@ class AreaSummarySensor(SensorEntity):
             energy_value = get_numeric_state(self.hass, energy_entity)
             if energy_value is not None:
                 energy_state = self.hass.states.get(energy_entity)
-                unit = energy_state.attributes.get("unit_of_measurement") if energy_state else UNIT_WATT_HOUR
+                unit = energy_state.attributes.get("unit_of_measurement") if energy_state else UnitOfEnergy.WATT_HOUR
                 attrs["energy_wh"] = energy_value
                 attrs["energy"] = f"{energy_value} {unit}"
 
@@ -349,7 +344,7 @@ class AreaSummarySensor(SensorEntity):
             temp_value = get_numeric_state(self.hass, temp_entity)
             if temp_value is not None:
                 temp_state = self.hass.states.get(temp_entity)
-                unit = temp_state.attributes.get("unit_of_measurement") if temp_state else UNIT_CELSIUS
+                unit = temp_state.attributes.get("unit_of_measurement") if temp_state else UnitOfTemperature.CELSIUS
                 attrs["temperature_c"] = temp_value
                 attrs["temperature"] = f"{temp_value} {unit}"
 
@@ -358,7 +353,7 @@ class AreaSummarySensor(SensorEntity):
             humidity_value = get_numeric_state(self.hass, humidity_entity)
             if humidity_value is not None:
                 humidity_state = self.hass.states.get(humidity_entity)
-                unit = humidity_state.attributes.get("unit_of_measurement") if humidity_state else UNIT_HUMIDITY
+                unit = humidity_state.attributes.get("unit_of_measurement") if humidity_state else PERCENTAGE
                 attrs["humidity_pct"] = humidity_value
                 attrs["humidity"] = f"{humidity_value} {unit}"
 
@@ -368,7 +363,7 @@ class AreaSummarySensor(SensorEntity):
             if climate_state and climate_state.attributes.get("temperature"):
                 try:
                     target_value = float(climate_state.attributes["temperature"])
-                    unit = climate_state.attributes.get("unit_of_measurement") or UNIT_CELSIUS
+                    unit = climate_state.attributes.get("unit_of_measurement") or UnitOfTemperature.CELSIUS
                     attrs["climate_target_c"] = target_value
                     attrs["climate_target"] = f"{target_value} {unit}"
                 except (ValueError, TypeError):
