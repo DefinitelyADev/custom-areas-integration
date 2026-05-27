@@ -300,29 +300,20 @@ class AreaSummarySensor(SensorEntity):
         """Return the state attributes."""
         attrs: Dict[str, Any] = {}
 
-        # Cache state lookups for performance
-        cached_states = {}
-
-        def get_cached_state(entity_id: str):
-            """Get state with caching to avoid multiple lookups."""
-            if entity_id not in cached_states:
-                cached_states[entity_id] = self.hass.states.get(entity_id)
-            return cached_states[entity_id]
-
         # Binary sensor attributes (motion, window, climate mode)
         motion_entity = _get_option(self.config_entry, CONF_MOTION_ENTITY)
         if motion_entity:
-            motion_state = get_cached_state(motion_entity)
+            motion_state = self.hass.states.get(motion_entity)
             attrs["occupied"] = motion_state.state == STATE_ON if motion_state else False
 
         window_entity = _get_option(self.config_entry, CONF_WINDOW_ENTITY)
         if window_entity:
-            window_state = get_cached_state(window_entity)
+            window_state = self.hass.states.get(window_entity)
             attrs["window_open"] = window_state.state == STATE_ON if window_state else False
 
         climate_entity = _get_option(self.config_entry, CONF_CLIMATE_ENTITY)
         if climate_entity:
-            climate_state = get_cached_state(climate_entity)
+            climate_state = self.hass.states.get(climate_entity)
             if climate_state:
                 attrs["climate_mode"] = climate_state.state
 
