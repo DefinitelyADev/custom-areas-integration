@@ -194,8 +194,9 @@ class AreaSummarySensor(SensorEntity):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self.config_entry = config_entry
-        # Display name (friendly): just the area name
-        self._attr_name = str(_get_option(config_entry, CONF_AREA_NAME, ""))
+        # Display name comes from the `name` property below (so it tolerates
+        # entry renames). `_attr_name` is intentionally not set — the property
+        # would override it anyway.
         self._attr_unique_id = f"custom_area_{config_entry.entry_id}_summary"
         self._attr_should_poll = False
 
