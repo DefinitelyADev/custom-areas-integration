@@ -24,7 +24,7 @@ pre-commit run --all-files # same hooks CI runs
 
 Single test: `pytest custom_components/custom_areas/tests/test_sensor.py::TestClass::test_name -v`
 
-CI runs a 3-cell matrix (HA 2024/py3.12, HA 2025/py3.13, HA 2026/py3.13) in `.github/workflows/ci.yml`, each pinning a specific `pytest-homeassistant-custom-component` version. Don't bump the HA floor (`2024.4.0` in `manifest.json`) without updating the matrix.
+CI runs a 4-cell matrix (HA 2024/py3.12, HA 2025/py3.13, HA 2026/py3.13, HA 2026-latest/py3.14) in `.github/workflows/ci.yml`, each pinning a specific `pytest-homeassistant-custom-component` version. The py3.14 cell tracks the moving head of HA (phacc 0.13.317+ and HA 2026.3.0+ require Python 3.14). The non-matrix jobs (lint, type-check, validate, pre-commit) run on py3.14 because `requirements-dev.txt`'s `homeassistant>=2026.5.4` floor needs it. Don't bump the HA floor (`2024.4.0` in `manifest.json`) without updating the matrix.
 
 ## Non-obvious conventions
 
