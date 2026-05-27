@@ -116,7 +116,7 @@ The area state is determined by this priority:
 The summary sensor icon changes based on area status:
 - Window open: `mdi:window-open-variant`
 - Motion detected: `mdi:motion-sensor`
-- Default: `mdi:home`
+- Default: `mdi:texture-box`
 
 ## Device Registry
 

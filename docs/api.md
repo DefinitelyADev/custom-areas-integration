@@ -90,4 +90,4 @@ The sensor icon changes based on room status:
 
 1. **Window Open**: If window sensor is ON → `mdi:window-open-variant`
 2. **Motion Detected**: If motion sensor is ON → `mdi:motion-sensor`
-3. **Default**: `mdi:home`
+3. **Default**: `mdi:texture-box`

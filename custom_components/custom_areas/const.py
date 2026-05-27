@@ -20,6 +20,5 @@ DEFAULT_ICON = "mdi:texture-box"
 STATE_ACTIVE = "active"
 
 # Icons
-ICON_HOME = "mdi:home"
 ICON_MOTION = "mdi:motion-sensor"
 ICON_WINDOW_OPEN = "mdi:window-open-variant"
