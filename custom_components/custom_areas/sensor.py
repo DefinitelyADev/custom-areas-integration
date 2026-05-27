@@ -174,7 +174,7 @@ class AreaSensorCoordinator:
         """Handle state change events."""
         # Update all registered sensors
         for sensor in self._sensors:
-            sensor.async_schedule_update_ha_state()  # pyright: ignore[reportUnusedCoroutine]
+            sensor.async_schedule_update_ha_state()
         return
 
     def register_sensor(self, sensor: SensorEntity) -> None:
