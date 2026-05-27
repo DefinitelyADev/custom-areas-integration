@@ -43,11 +43,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     except Exception as ex:
-        _LOGGER.error("Error setting up areas integration: %s", ex)
-        _LOGGER.error("Exception type: %s", type(ex).__name__)
-        import traceback
-
-        _LOGGER.error("Full traceback: %s", traceback.format_exc())
+        # HA itself logs ConfigEntryNotReady with context and retries setup
+        # on a backoff. Emit one structured warning (exc_info=ex includes the
+        # traceback) and let HA handle the retry messaging. Use `warning`
+        # rather than `error` since setup retries are routine on restart.
+        _LOGGER.warning("Setup failed for %s: %s", entry.title, ex, exc_info=ex)
         raise ConfigEntryNotReady from ex
 
 
