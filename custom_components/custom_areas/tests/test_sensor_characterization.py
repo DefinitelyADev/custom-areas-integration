@@ -178,11 +178,11 @@ def test_device_info_identifiers(sensor_id, mock_coordinator, mock_config_entry,
     sensor = _make_sensor(spec, mock_coordinator, mock_config_entry, mock_hass)
 
     assert sensor.device_info is not None
-    # DeviceInfo is a TypedDict with optional keys; subscript suppresses are
-    # for pyright since the integration always sets these.
-    assert sensor.device_info["identifiers"] == {
-        (DOMAIN, "test_entry_id")
-    }  # pyright: ignore[reportTypedDictNotRequiredAccess]
+    # DeviceInfo is a TypedDict with optional keys; suppress lives on the
+    # subscript line itself (pyright tracks diagnostics per-line) since the
+    # integration always sets these four fields at construction time.
+    identifiers = sensor.device_info["identifiers"]  # pyright: ignore[reportTypedDictNotRequiredAccess]
+    assert identifiers == {(DOMAIN, "test_entry_id")}
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)
@@ -202,9 +202,8 @@ def test_device_info_manufacturer(sensor_id, mock_coordinator, mock_config_entry
     sensor = _make_sensor(spec, mock_coordinator, mock_config_entry, mock_hass)
 
     assert sensor.device_info is not None
-    assert (
-        sensor.device_info["manufacturer"] == "Areas Integration"
-    )  # pyright: ignore[reportTypedDictNotRequiredAccess]
+    manufacturer = sensor.device_info["manufacturer"]  # pyright: ignore[reportTypedDictNotRequiredAccess]
+    assert manufacturer == "Areas Integration"
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)
