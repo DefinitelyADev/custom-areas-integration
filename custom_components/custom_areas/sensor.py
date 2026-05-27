@@ -1,8 +1,10 @@
 """Sensor platform for Custom Areas Integration."""
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -19,6 +21,9 @@ from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.event import EventStateChangedData
 
 from .const import (
     CONF_ACTIVE_THRESHOLD,
@@ -166,7 +171,7 @@ class AreaSensorCoordinator:
             _LOGGER.debug("Successfully registered state change listener")
 
     @callback
-    def _handle_state_change(self, _: Event) -> None:
+    def _handle_state_change(self, _: Event[EventStateChangedData]) -> None:
         """Handle state change events."""
         # Update all registered sensors
         for sensor in self._sensors:
