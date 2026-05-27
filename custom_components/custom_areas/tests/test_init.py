@@ -31,7 +31,7 @@ def _make_entry(area_name: str = "Living Room") -> MockConfigEntry:
     )
 
 
-async def test_async_setup_entry_happy_path(hass: HomeAssistant) -> None:
+async def test_async_setup_entry_happy_path(hass: HomeAssistant, enable_custom_integrations) -> None:
     """A valid entry sets up, stores the coordinator, and creates a device."""
     entry = _make_entry()
     entry.add_to_hass(hass)
@@ -53,7 +53,7 @@ async def test_async_setup_entry_happy_path(hass: HomeAssistant) -> None:
     assert device.manufacturer == "Areas Integration"
 
 
-async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAssistant) -> None:
+async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAssistant, enable_custom_integrations) -> None:
     """When the coordinator's first refresh raises, setup must re-raise ConfigEntryNotReady.
 
     ``__init__.py`` deliberately catches the broad ``Exception``, logs, and
@@ -73,7 +73,7 @@ async def test_async_setup_entry_reraises_as_config_entry_not_ready(hass: HomeAs
             await async_setup_entry(hass, entry)
 
 
-async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant) -> None:
+async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant, enable_custom_integrations) -> None:
     """Unload removes the coordinator from hass.data and calls shutdown."""
     entry = _make_entry("Kitchen")
     entry.add_to_hass(hass)
@@ -90,7 +90,7 @@ async def test_async_unload_entry_clears_data_and_shuts_down(hass: HomeAssistant
     assert shutdown_spy.call_count == 1
 
 
-async def test_async_reload_entry_replaces_coordinator(hass: HomeAssistant) -> None:
+async def test_async_reload_entry_replaces_coordinator(hass: HomeAssistant, enable_custom_integrations) -> None:
     """Reloading the entry unloads then re-sets-up, producing a fresh coordinator."""
     entry = _make_entry("Office")
     entry.add_to_hass(hass)

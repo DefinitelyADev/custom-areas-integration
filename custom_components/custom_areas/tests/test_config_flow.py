@@ -35,7 +35,7 @@ from custom_components.custom_areas.const import (
 )
 
 
-async def test_user_flow_happy_path(hass: HomeAssistant) -> None:
+async def test_user_flow_happy_path(hass: HomeAssistant, enable_custom_integrations) -> None:
     """Submitting a valid form creates a ConfigEntry with the expected title and data."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
 
@@ -54,7 +54,7 @@ async def test_user_flow_happy_path(hass: HomeAssistant) -> None:
     assert result["data"][CONF_POWER_ENTITY] == "sensor.lr_power"
 
 
-async def test_user_flow_duplicate_area_name_aborts(hass: HomeAssistant) -> None:
+async def test_user_flow_duplicate_area_name_aborts(hass: HomeAssistant, enable_custom_integrations) -> None:
     """A second submission with the same area_name aborts as already_configured."""
     # First entry — success.
     first = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
@@ -74,7 +74,7 @@ async def test_user_flow_duplicate_area_name_aborts(hass: HomeAssistant) -> None
     assert second["reason"] == "already_configured"
 
 
-async def test_user_flow_optional_fields_omitted(hass: HomeAssistant) -> None:
+async def test_user_flow_optional_fields_omitted(hass: HomeAssistant, enable_custom_integrations) -> None:
     """Only area_name supplied — entry is created and optional refs are absent from data."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(
@@ -102,7 +102,7 @@ async def test_user_flow_optional_fields_omitted(hass: HomeAssistant) -> None:
         assert key not in data, f"Unexpected optional key {key!r} in entry.data"
 
 
-async def test_user_flow_icon_default_applied(hass: HomeAssistant) -> None:
+async def test_user_flow_icon_default_applied(hass: HomeAssistant, enable_custom_integrations) -> None:
     """When icon is omitted, the flow defaults it to DEFAULT_ICON (mdi:texture-box).
 
     See ``config_flow.py:49-50`` — the icon default is applied at config time
@@ -119,7 +119,7 @@ async def test_user_flow_icon_default_applied(hass: HomeAssistant) -> None:
     assert DEFAULT_ICON == "mdi:texture-box"
 
 
-async def test_user_flow_negative_threshold_rejected(hass: HomeAssistant) -> None:
+async def test_user_flow_negative_threshold_rejected(hass: HomeAssistant, enable_custom_integrations) -> None:
     """active_threshold=-5 is rejected by the voluptuous schema (vol.Range(min=0))."""
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
 
