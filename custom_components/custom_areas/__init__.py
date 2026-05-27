@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 
-from .const import DOMAIN
+from .const import CONF_AREA_NAME, DOMAIN
 from .sensor import AreaSensorCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
             identifiers={(DOMAIN, entry.entry_id)},
-            name=f"Area: {entry.data.get('area_name', 'Unknown')}",
+            name=f"Area: {entry.data.get(CONF_AREA_NAME, 'Unknown')}",
             manufacturer="Areas Integration",
             model="Area Sensor",
         )
@@ -43,11 +43,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     except Exception as ex:
-        _LOGGER.error("Error setting up areas integration: %s", ex)
-        _LOGGER.error("Exception type: %s", type(ex).__name__)
-        import traceback
-
-        _LOGGER.error("Full traceback: %s", traceback.format_exc())
+        # HA itself logs ConfigEntryNotReady with context and retries setup
+        # on a backoff. Emit one structured warning (exc_info=ex includes the
+        # traceback) and let HA handle the retry messaging. Use `warning`
+        # rather than `error` since setup retries are routine on restart.
+        _LOGGER.warning("Setup failed for %s: %s", entry.title, ex, exc_info=ex)
         raise ConfigEntryNotReady from ex
 
 
@@ -59,7 +59,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
-        coordinator.async_shutdown()
+        coordinator.shutdown()
 
     return unload_ok
 
