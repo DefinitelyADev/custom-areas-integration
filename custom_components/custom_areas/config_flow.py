@@ -39,11 +39,6 @@ class AreasConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Areas."""
 
     VERSION = 1
-    DOMAIN = DOMAIN
-
-    def __init__(self):
-        """Initialize the config flow."""
-        self._data = {}
 
     @staticmethod
     def async_get_options_flow(config_entry: ConfigEntry) -> "AreasOptionsFlowHandler":
