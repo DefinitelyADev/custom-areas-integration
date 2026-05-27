@@ -1,7 +1,8 @@
 """Sensor platform for Custom Areas Integration."""
 
 import logging
-from typing import Any, Callable, Dict, Optional
+from collections.abc import Callable
+from typing import Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -46,7 +47,7 @@ UNIT_WATT_HOUR: str = UnitOfEnergy.WATT_HOUR
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_numeric_state(hass: HomeAssistant, entity_id: str) -> Optional[float]:
+def get_numeric_state(hass: HomeAssistant, entity_id: str) -> float | None:
     """Get numeric state from entity.
 
     Returns the parsed float value, or None if the entity doesn't exist
@@ -207,11 +208,11 @@ class AreaSummarySensor(SensorEntity):
         # References to measurement sensors. Attribute names kept (`power_sensor`
         # etc.) for backward compatibility; the concrete type is now the
         # parameterized AreaMeasurementSensor.
-        self.power_sensor: Optional["AreaMeasurementSensor"] = None
-        self.energy_sensor: Optional["AreaMeasurementSensor"] = None
-        self.temperature_sensor: Optional["AreaMeasurementSensor"] = None
-        self.humidity_sensor: Optional["AreaMeasurementSensor"] = None
-        self.climate_target_sensor: Optional["AreaMeasurementSensor"] = None
+        self.power_sensor: "AreaMeasurementSensor | None" = None
+        self.energy_sensor: "AreaMeasurementSensor | None" = None
+        self.temperature_sensor: "AreaMeasurementSensor | None" = None
+        self.humidity_sensor: "AreaMeasurementSensor | None" = None
+        self.climate_target_sensor: "AreaMeasurementSensor | None" = None
 
         # Register with coordinator
         coordinator.register_sensor(self)
@@ -231,7 +232,7 @@ class AreaSummarySensor(SensorEntity):
         return str(area_name) if area_name else ""
 
     @property
-    def suggested_object_id(self) -> Optional[str]:
+    def suggested_object_id(self) -> str | None:
         """Suggest object_id so entity_id gets a area_ prefix.
 
         Home Assistant will slugify this into the final object_id.
@@ -300,9 +301,9 @@ class AreaSummarySensor(SensorEntity):
         return str(icon_value) if icon_value is not None else DEFAULT_ICON
 
     @property
-    def extra_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
-        attrs: Dict[str, Any] = {}
+        attrs: dict[str, Any] = {}
 
         # Binary sensor attributes (motion, window, climate mode)
         motion_entity = _get_option(self.config_entry, CONF_MOTION_ENTITY)
@@ -397,7 +398,7 @@ class AreaMeasurementSensor(SensorEntity):
         suffix: str,
         name_suffix: str,
         default_unit: str,
-        source_attribute: Optional[str] = None,
+        source_attribute: str | None = None,
     ) -> None:
         """Initialize a measurement sensor.
 
@@ -435,13 +436,13 @@ class AreaMeasurementSensor(SensorEntity):
         coordinator.register_sensor(self)
 
     @property
-    def suggested_object_id(self) -> Optional[str]:
+    def suggested_object_id(self) -> str | None:
         """Suggest object_id (HA slugifies this for the final entity_id)."""
         area_name = str(_get_option(self.config_entry, CONF_AREA_NAME, "")).strip()
         return f"custom_area_{area_name}_{self._suffix}" if area_name else None
 
     @property
-    def native_value(self) -> Optional[float]:
+    def native_value(self) -> float | None:
         """Return the state of the sensor.
 
         For non-climate sensors (`source_attribute is None`): the parsed
@@ -468,7 +469,7 @@ class AreaMeasurementSensor(SensorEntity):
         return None
 
     @property
-    def native_unit_of_measurement(self) -> Optional[str]:
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement.
 
         Returns the source entity's `unit_of_measurement` attribute when
