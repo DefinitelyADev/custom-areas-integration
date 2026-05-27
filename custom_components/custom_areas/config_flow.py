@@ -114,8 +114,15 @@ class AreasOptionsFlowHandler(config_entries.OptionsFlow):
     """
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        """Capture the entry being reconfigured."""
-        self.config_entry = config_entry
+        """Capture the entry being reconfigured.
+
+        Stored on a private attribute (`_entry`) rather than
+        ``self.config_entry``: in newer Home Assistant releases
+        ``OptionsFlow.config_entry`` is a framework-provided read-only
+        property, so the subclass cannot assign to it. The private name
+        works across all supported HA versions.
+        """
+        self._entry = config_entry
 
     async def async_step_init(self, user_input: Optional[Dict[str, Any]] = None) -> "ConfigFlowResult":
         """Show the options form, then save into `entry.options`."""
@@ -128,9 +135,9 @@ class AreasOptionsFlowHandler(config_entries.OptionsFlow):
 
         def _current(key: str) -> Any:
             """Options take precedence over data for default values."""
-            if key in self.config_entry.options:
-                return self.config_entry.options[key]
-            return self.config_entry.data.get(key)
+            if key in self._entry.options:
+                return self._entry.options[key]
+            return self._entry.data.get(key)
 
         schema: dict[Any, Any] = {
             vol.Required(CONF_AREA_NAME, default=_current(CONF_AREA_NAME)): str,
