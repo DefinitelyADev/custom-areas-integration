@@ -4,7 +4,16 @@ from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_IDLE, STATE_OFF, STATE_ON, STATE_UNKNOWN
+from homeassistant.const import (
+    PERCENTAGE,
+    STATE_IDLE,
+    STATE_OFF,
+    STATE_ON,
+    STATE_UNKNOWN,
+    UnitOfEnergy,
+    UnitOfPower,
+    UnitOfTemperature,
+)
 from homeassistant.core import HomeAssistant
 
 from custom_components.custom_areas.const import (
@@ -20,13 +29,9 @@ from custom_components.custom_areas.const import (
     STATE_ACTIVE,
 )
 from custom_components.custom_areas.sensor import (
+    AreaMeasurementSensor,
     AreaSensorCoordinator,
     AreaSummarySensor,
-    ClimateTargetSensor,
-    EnergySensor,
-    HumiditySensor,
-    PowerSensor,
-    TemperatureSensor,
 )
 
 
@@ -167,27 +172,67 @@ def test_area_summary_sensor_attributes(mock_coordinator, mock_config_entry, moc
     sensor.hass = mock_hass
 
     # Create and assign measurement sensors
-    power_sensor = PowerSensor(mock_coordinator, mock_config_entry)
+    power_sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=CONF_POWER_ENTITY,
+        suffix="power",
+        name_suffix="Power",
+        default_unit=UnitOfPower.WATT,
+        source_attribute=None,
+    )
     power_sensor.hass = mock_hass
     setattr(power_sensor, "_attr_unit_of_measurement", "W")
     sensor.power_sensor = power_sensor
 
-    energy_sensor = EnergySensor(mock_coordinator, mock_config_entry)
+    energy_sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=CONF_ENERGY_ENTITY,
+        suffix="energy",
+        name_suffix="Energy",
+        default_unit=UnitOfEnergy.WATT_HOUR,
+        source_attribute=None,
+    )
     energy_sensor.hass = mock_hass
     setattr(energy_sensor, "_attr_unit_of_measurement", "Wh")
     sensor.energy_sensor = energy_sensor
 
-    temperature_sensor = TemperatureSensor(mock_coordinator, mock_config_entry)
+    temperature_sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=CONF_TEMP_ENTITY,
+        suffix="temperature",
+        name_suffix="Temperature",
+        default_unit=UnitOfTemperature.CELSIUS,
+        source_attribute=None,
+    )
     temperature_sensor.hass = mock_hass
     setattr(temperature_sensor, "_attr_unit_of_measurement", "°C")
     sensor.temperature_sensor = temperature_sensor
 
-    humidity_sensor = HumiditySensor(mock_coordinator, mock_config_entry)
+    humidity_sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=CONF_HUMIDITY_ENTITY,
+        suffix="humidity",
+        name_suffix="Humidity",
+        default_unit=PERCENTAGE,
+        source_attribute=None,
+    )
     humidity_sensor.hass = mock_hass
     setattr(humidity_sensor, "_attr_unit_of_measurement", "%")
     sensor.humidity_sensor = humidity_sensor
 
-    climate_target_sensor = ClimateTargetSensor(mock_coordinator, mock_config_entry)
+    climate_target_sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=CONF_CLIMATE_ENTITY,
+        suffix="climate_target",
+        name_suffix="Climate Target",
+        default_unit=UnitOfTemperature.CELSIUS,
+        source_attribute="temperature",
+    )
     climate_target_sensor.hass = mock_hass
     setattr(climate_target_sensor, "_attr_unit_of_measurement", "°C")
     sensor.climate_target_sensor = climate_target_sensor

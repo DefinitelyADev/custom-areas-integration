@@ -34,18 +34,15 @@ from custom_components.custom_areas.const import (
     CONF_TEMP_ENTITY,
     DOMAIN,
 )
-from custom_components.custom_areas.sensor import (
-    AreaSensorCoordinator,
-    ClimateTargetSensor,
-    EnergySensor,
-    HumiditySensor,
-    PowerSensor,
-    TemperatureSensor,
-)
+from custom_components.custom_areas.sensor import AreaMeasurementSensor, AreaSensorCoordinator
 
+# Per-sensor specs. Construction now goes through `AreaMeasurementSensor` for
+# every type — pre-M1 each spec named its dedicated class here (PowerSensor,
+# EnergySensor, ...). The collapse to a single parameterized class is the
+# refactor under test; the *assertions* about output strings, device_info,
+# native_value, and native_unit are unchanged from the pre-M1 snapshot.
 EXPECTED_SENSOR_SURFACE: dict[str, dict[str, Any]] = {
     "power": {
-        "class": PowerSensor,
         "config_key": CONF_POWER_ENTITY,
         "entity_id": "sensor.power",
         "unique_id_suffix": "power",
@@ -54,7 +51,6 @@ EXPECTED_SENSOR_SURFACE: dict[str, dict[str, Any]] = {
         "source_attribute": None,
     },
     "energy": {
-        "class": EnergySensor,
         "config_key": CONF_ENERGY_ENTITY,
         "entity_id": "sensor.energy",
         "unique_id_suffix": "energy",
@@ -63,7 +59,6 @@ EXPECTED_SENSOR_SURFACE: dict[str, dict[str, Any]] = {
         "source_attribute": None,
     },
     "temperature": {
-        "class": TemperatureSensor,
         "config_key": CONF_TEMP_ENTITY,
         "entity_id": "sensor.temperature",
         "unique_id_suffix": "temperature",
@@ -72,7 +67,6 @@ EXPECTED_SENSOR_SURFACE: dict[str, dict[str, Any]] = {
         "source_attribute": None,
     },
     "humidity": {
-        "class": HumiditySensor,
         "config_key": CONF_HUMIDITY_ENTITY,
         "entity_id": "sensor.humidity",
         "unique_id_suffix": "humidity",
@@ -81,7 +75,6 @@ EXPECTED_SENSOR_SURFACE: dict[str, dict[str, Any]] = {
         "source_attribute": None,
     },
     "climate_target": {
-        "class": ClimateTargetSensor,
         "config_key": CONF_CLIMATE_ENTITY,
         "entity_id": "climate.thermostat",
         "unique_id_suffix": "climate_target",
@@ -134,8 +127,16 @@ def mock_coordinator(mock_hass, mock_config_entry):
 
 
 def _make_sensor(spec: dict[str, Any], mock_coordinator, mock_config_entry, mock_hass):
-    """Instantiate the sensor class for a given spec and wire `hass`."""
-    sensor = spec["class"](mock_coordinator, mock_config_entry)
+    """Instantiate AreaMeasurementSensor for a given spec and wire `hass`."""
+    sensor = AreaMeasurementSensor(
+        mock_coordinator,
+        mock_config_entry,
+        config_key=spec["config_key"],
+        suffix=spec["unique_id_suffix"],
+        name_suffix=spec["name_suffix"],
+        default_unit=spec["default_unit"],
+        source_attribute=spec["source_attribute"],
+    )
     sensor.hass = mock_hass
     return sensor
 
