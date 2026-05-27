@@ -17,12 +17,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    PERCENTAGE,
-    UnitOfEnergy,
-    UnitOfPower,
-    UnitOfTemperature,
-)
+from homeassistant.const import PERCENTAGE, UnitOfEnergy, UnitOfPower, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 
 from custom_components.custom_areas.const import (
@@ -185,7 +180,7 @@ def test_device_info_identifiers(sensor_id, mock_coordinator, mock_config_entry,
     assert sensor.device_info is not None
     # DeviceInfo is a TypedDict with optional keys; subscript suppresses are
     # for pyright since the integration always sets these.
-    assert sensor.device_info["identifiers"] == {(DOMAIN, "test_entry_id")}  # type: ignore[typeddict-item]
+    assert sensor.device_info["identifiers"] == {(DOMAIN, "test_entry_id")}  # pyright: ignore[reportTypedDictNotRequiredAccess]
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)
@@ -195,7 +190,7 @@ def test_device_info_name(sensor_id, mock_coordinator, mock_config_entry, mock_h
     sensor = _make_sensor(spec, mock_coordinator, mock_config_entry, mock_hass)
 
     assert sensor.device_info is not None
-    assert sensor.device_info["name"] == "Area: Test Area"  # type: ignore[typeddict-item]
+    assert sensor.device_info["name"] == "Area: Test Area"  # pyright: ignore[reportTypedDictNotRequiredAccess]
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)
@@ -205,7 +200,7 @@ def test_device_info_manufacturer(sensor_id, mock_coordinator, mock_config_entry
     sensor = _make_sensor(spec, mock_coordinator, mock_config_entry, mock_hass)
 
     assert sensor.device_info is not None
-    assert sensor.device_info["manufacturer"] == "Areas Integration"  # type: ignore[typeddict-item]
+    assert sensor.device_info["manufacturer"] == "Areas Integration"  # pyright: ignore[reportTypedDictNotRequiredAccess]
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)
@@ -215,7 +210,7 @@ def test_device_info_model(sensor_id, mock_coordinator, mock_config_entry, mock_
     sensor = _make_sensor(spec, mock_coordinator, mock_config_entry, mock_hass)
 
     assert sensor.device_info is not None
-    assert sensor.device_info["model"] == "Area Sensor"  # type: ignore[typeddict-item]
+    assert sensor.device_info["model"] == "Area Sensor"  # pyright: ignore[reportTypedDictNotRequiredAccess]
 
 
 @pytest.mark.parametrize("sensor_id", SENSOR_IDS)

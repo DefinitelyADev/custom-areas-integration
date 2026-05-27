@@ -28,11 +28,7 @@ from custom_components.custom_areas.const import (
     CONF_WINDOW_ENTITY,
     STATE_ACTIVE,
 )
-from custom_components.custom_areas.sensor import (
-    AreaMeasurementSensor,
-    AreaSensorCoordinator,
-    AreaSummarySensor,
-)
+from custom_components.custom_areas.sensor import AreaMeasurementSensor, AreaSensorCoordinator, AreaSummarySensor
 
 
 @pytest.fixture
