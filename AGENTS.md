@@ -20,7 +20,7 @@ custom_components/custom_areas/   # the integration (all runtime code lives here
 ├── strings.json + translations/  # i18n
 └── tests/test_sensor.py          # pytest-asyncio + MagicMock(spec=HomeAssistant)
 docs/                             # mkdocs site (api, examples, developer, rationale)
-.github/workflows/ci.yml          # 3-cell matrix: HA 2024(py3.12), HA 2025/2026(py3.13)
+.github/workflows/ci.yml          # 4-cell matrix: HA 2024(py3.12), HA 2025/2026(py3.13), HA 2026-latest(py3.14)
 check_all.py, validate.py, run_tests.py, run_mypy.sh   # local dev orchestrators
 ```
 
@@ -51,7 +51,7 @@ check_all.py, validate.py, run_tests.py, run_mypy.sh   # local dev orchestrators
 - **Don't break the 120-col line limit** to match upstream HA's 88.
 - **Don't catch `Exception` then swallow** — `__init__.py` deliberately re-raises as `ConfigEntryNotReady`. Preserve that.
 - **Don't add new dev tooling** — black/isort/flake8/mypy/pyright/ruff already overlap. Pick the one that fires; don't add a 7th.
-- **Don't bump HA min version** without checking the CI matrix (`2024.4.0` is the floor; matrix tests 2024/2025/2026).
+- **Don't bump HA min version** without checking the CI matrix (`2024.4.0` is the floor; matrix tests 2024/2025/2026/2026-latest across py3.12/3.13/3.14). The non-matrix jobs (lint, type-check, validate, pre-commit) install `requirements-dev.txt` directly on py3.14 — its `homeassistant>=2026.5.4` floor gates that.
 
 ## UNIQUE STYLES
 
@@ -72,7 +72,7 @@ black custom_components/custom_areas/            # apply formatting (line-length
 isort custom_components/custom_areas/            # apply import sort
 ```
 
-CI runs `check_all.py` equivalent across the 3-cell HA matrix in `.github/workflows/ci.yml`.
+CI runs `check_all.py` equivalent across the 4-cell HA matrix in `.github/workflows/ci.yml`.
 
 ## NOTES
 

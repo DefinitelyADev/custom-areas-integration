@@ -38,6 +38,13 @@ jobs:
             ha-version: "2026"
             phacc-pin: "pytest-homeassistant-custom-component==0.13.316"
             extra-pins: ""
+          # HA 2026 latest — phacc 0.13.317+ requires Python 3.14 and
+          # HA 2026.3.0+ requires Python 3.14.2. This cell tracks the
+          # moving head of HA against the current stable Python.
+          - python-version: "3.14"
+            ha-version: "2026-latest"
+            phacc-pin: "pytest-homeassistant-custom-component==0.13.333"
+            extra-pins: ""
     name: test (py${{ matrix.python-version }}, HA ${{ matrix.ha-version }})
     steps:
     - uses: actions/checkout@v6
@@ -87,7 +94,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Install dependencies
       run: |
@@ -106,7 +113,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Install dependencies
       run: |
@@ -176,7 +183,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.13"
+        python-version: "3.14"
 
     - name: Install dependencies
       run: |
