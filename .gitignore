@@ -129,3 +129,4 @@ Thumbs.db
 
 # Claude Code local config
 .claude/
+.mcp.json
