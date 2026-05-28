@@ -5,6 +5,21 @@ All notable changes to the Custom Areas integration will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-05-28
+
+### Added
+- Options flow: edit `power_entity`, `energy_entity`, `temperature_entity`, `humidity_entity`, `motion_entity`, `window_entity`, `climate_entity`, `icon`, and `active_threshold` after the entry has been created — no need to remove and re-add the integration.
+
+### Changed
+- Internal: collapsed the five `Area{Power,Energy,Temperature,Humidity,ClimateTarget}Sensor` classes into a single parameterized `AreaMeasurementSensor`. Pinned by a characterization test so the public surface (`unique_id`, `_attr_name`, `suggested_object_id`, `device_info`, `native_value`, `native_unit_of_measurement`) is byte-identical to v1.3.0.
+
+### CI / Dev
+- Added 4th matrix cell: Python 3.14 / Home Assistant 2026-latest (`pytest-homeassistant-custom-component` 0.13.333+). Lint, type-check, validate, and pre-commit jobs moved to Python 3.14.
+- Release job now depends on `hassfest` and verifies `manifest.json:version` matches the release tag — prevents the manifest/tag drift that silenced the v1.3.0 HACS update.
+- Real-`hass`-fixture tests for `config_flow`, `__init__` setup/unload lifecycle, and sensor behaviour (replacing `MagicMock(spec=HomeAssistant)` stubs).
+- Dev requirements: `homeassistant>=2026.5.4`, `pre-commit>=4.6.0`, `mypy>=2.1.0`.
+- Docs synced to the multi-entity architecture introduced in v1.2.0 / v1.3.0.
+
 ## [1.3.0] - 2026-05-27
 
 ### Fixed
