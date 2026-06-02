@@ -6,7 +6,7 @@ pytest-homeassistant-custom-component>=0.13.335
 
 # Home Assistant testing
 homeassistant>=2026.5.4
-voluptuous>=0.13.0
+voluptuous>=0.15.2
 
 # Code quality
 black>=26.5.1
