@@ -1,0 +1,70 @@
+name: 🐛 Bug Report
+description: Report a problem with the Custom Areas integration
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+        For questions or general help, use [Discussions](https://github.com/DefinitelyADev/custom-areas-integration/discussions) instead.
+  - type: checkboxes
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I'm running the latest released version of the integration.
+          required: true
+        - label: I searched existing issues and didn't find a duplicate.
+          required: true
+  - type: input
+    id: integration-version
+    attributes:
+      label: Integration version
+      placeholder: "e.g. 1.2.0"
+    validations:
+      required: true
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant version
+      placeholder: "e.g. 2026.5.4"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and its impact.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Configure an area with '...'
+        2. Change entity '...'
+        3. See '...'
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Area configuration
+      description: Which entity types did you configure for the affected area (power, energy, temperature, motion, etc.)?
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste any related Home Assistant logs. Remove personal data (tokens, exact locations) before posting.
+      render: shell
+    validations:
+      required: false
