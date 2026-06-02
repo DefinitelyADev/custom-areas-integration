@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & Discussions
+    url: https://github.com/DefinitelyADev/custom-areas-integration/discussions
+    about: Ask questions, share setups, and discuss ideas here.
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/DefinitelyADev/custom-areas-integration/security/advisories/new
+    about: Please report security issues privately, not as public issues.
