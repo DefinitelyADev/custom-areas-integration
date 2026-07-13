@@ -5,7 +5,7 @@ pytest-cov>=3.0.0
 pytest-homeassistant-custom-component>=0.13.335
 
 # Home Assistant testing
-homeassistant>=2026.5.4
+homeassistant>=2026.7.2
 voluptuous>=0.15.2
 
 # Code quality
